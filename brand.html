@@ -1,0 +1,795 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Orbi: To the Moon — Brand &amp; Marketing</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    .fade-in {
+      opacity: 0;
+      transform: translateY(28px);
+      transition: opacity 0.6s ease, transform 0.6s ease;
+    }
+    .fade-in.visible { opacity: 1; transform: translateY(0); }
+
+    /* Colour palette swatches */
+    .palette-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: 16px;
+    }
+
+    .swatch {
+      border-radius: var(--radius);
+      overflow: hidden;
+      border: 1px solid var(--border);
+    }
+
+    .swatch-color {
+      height: 80px;
+    }
+
+    .swatch-info {
+      padding: 12px;
+      background: rgba(255,255,255,0.04);
+    }
+
+    .swatch-name {
+      font-size: 0.82rem;
+      font-weight: 700;
+      margin-bottom: 2px;
+    }
+
+    .swatch-hex {
+      font-size: 0.72rem;
+      font-family: monospace;
+      color: var(--text-muted);
+    }
+
+    /* Typography specimens */
+    .type-specimen {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 32px;
+    }
+
+    .type-specimen + .type-specimen { margin-top: 16px; }
+
+    .type-label {
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      margin-bottom: 8px;
+    }
+
+    /* Social mock-ups */
+    .social-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 24px;
+      transition: all 0.3s;
+    }
+
+    .social-card:hover {
+      border-color: var(--border-bright);
+      transform: translateY(-4px);
+      box-shadow: var(--shadow-glow);
+    }
+
+    .social-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .social-avatar {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      background: var(--grad-primary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.4rem;
+      flex-shrink: 0;
+    }
+
+    .social-handle { font-size: 0.85rem; font-weight: 700; }
+    .social-username { font-size: 0.75rem; color: var(--text-muted); }
+
+    .social-body {
+      font-size: 0.88rem;
+      color: var(--text-secondary);
+      line-height: 1.65;
+    }
+
+    .social-hashtag { color: var(--accent-blue-lt); }
+    .social-emoji { }
+
+    .social-footer {
+      display: flex;
+      gap: 24px;
+      margin-top: 16px;
+      color: var(--text-muted);
+      font-size: 0.78rem;
+    }
+
+    /* Persona cards */
+    .persona {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 28px;
+      transition: all 0.3s;
+    }
+
+    .persona:hover {
+      border-color: var(--border-bright);
+      box-shadow: var(--shadow-glow);
+    }
+
+    .persona-avatar {
+      font-size: 3rem;
+      margin-bottom: 12px;
+      display: block;
+    }
+
+    .persona-name {
+      font-size: 1.1rem;
+      font-weight: 800;
+      margin-bottom: 4px;
+    }
+
+    .persona-role {
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: var(--accent-purple-lt);
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      margin-bottom: 14px;
+    }
+
+    .persona-quote {
+      font-size: 0.9rem;
+      color: var(--text-secondary);
+      font-style: italic;
+      border-left: 2px solid var(--accent-purple);
+      padding-left: 12px;
+      margin-bottom: 16px;
+    }
+
+    /* Channel matrix */
+    .channel-item {
+      display: flex;
+      gap: 20px;
+      padding: 20px 0;
+      border-bottom: 1px solid var(--border);
+      align-items: flex-start;
+    }
+
+    .channel-item:last-child { border-bottom: none; }
+
+    .channel-icon {
+      font-size: 1.8rem;
+      flex-shrink: 0;
+      width: 44px;
+      text-align: center;
+    }
+
+    .channel-priority {
+      display: inline-block;
+      font-size: 0.7rem;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 100px;
+      margin-left: 8px;
+    }
+
+    .priority-core    { background: rgba(124,58,237,0.2); color: var(--accent-purple-lt); border:1px solid rgba(124,58,237,0.3); }
+    .priority-growth  { background: rgba(59,130,246,0.2); color: var(--accent-blue-lt);   border:1px solid rgba(59,130,246,0.3); }
+    .priority-support { background: rgba(107,114,128,0.2); color: #9ca3af;               border:1px solid rgba(107,114,128,0.3); }
+
+    /* Voice & tone */
+    .voice-pair {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin-bottom: 16px;
+    }
+
+    .voice-do {
+      background: rgba(34,197,94,0.06);
+      border: 1px solid rgba(34,197,94,0.2);
+      border-radius: var(--radius);
+      padding: 16px;
+      font-size: 0.88rem;
+      color: var(--text-secondary);
+    }
+
+    .voice-dont {
+      background: rgba(239,68,68,0.06);
+      border: 1px solid rgba(239,68,68,0.2);
+      border-radius: var(--radius);
+      padding: 16px;
+      font-size: 0.88rem;
+      color: var(--text-secondary);
+    }
+
+    .voice-label {
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      margin-bottom: 6px;
+    }
+
+    .do-label  { color: #4ade80; }
+    .dont-label { color: #f87171; }
+  </style>
+</head>
+<body>
+
+<canvas id="stars-canvas"></canvas>
+
+<nav class="navbar">
+  <div class="nav-inner">
+    <span class="nav-logo">☽ Orbi</span>
+    <ul class="nav-links">
+      <li><a href="index.html">Landing</a></li>
+      <li><a href="technical.html">Technical</a></li>
+      <li><a href="strategy.html">Strategy</a></li>
+      <li><a href="brand.html">Brand</a></li>
+      <li><a href="index.html" class="nav-cta">View Pitch →</a></li>
+    </ul>
+  </div>
+</nav>
+
+<div class="page-header">
+  <div class="container">
+    <span class="page-badge">Brand &amp; Marketing</span>
+    <h1>How the World Sees <span class="grad-text">Orbi</span></h1>
+    <p>Brand name, visual identity, voice, and the channels we use to build a community of true believers.</p>
+  </div>
+</div>
+
+<!-- Brand Name & Story -->
+<section>
+  <div class="container">
+    <div class="grid-2 fade-in" style="align-items:center; gap:60px;">
+      <div>
+        <span class="section-label">Brand Identity</span>
+        <h2 class="section-title">Why "Orbi: To the Moon"</h2>
+        <p style="color:var(--text-secondary); font-size:0.98rem; line-height:1.75; margin-bottom:20px;">
+          <strong style="color:#fff;">Orbi</strong> derives from the Latin <em>orbis</em> — meaning circle, world, or sphere.
+          It evokes the Moon, orbital motion, and the cyclical nature of crypto markets.
+          It's short, memorable, and domain-friendly.
+        </p>
+        <p style="color:var(--text-secondary); font-size:0.98rem; line-height:1.75; margin-bottom:20px;">
+          <strong style="color:#fff;">"To the Moon"</strong> is one of the most culturally loaded phrases in crypto.
+          From Dogecoin to Bitcoin ATH celebrations, it represents optimism, momentum, and community belief
+          in a project. By making it part of our name, we're not following the trend — we're owning it.
+        </p>
+        <p style="color:var(--text-secondary); font-size:0.98rem; line-height:1.75;">
+          Together, the name tells a complete story: a cosmic world, a Moon character, a community
+          going up together. Every part of the game — the Moon character, the $STR token (Stars),
+          the cosmic UI, the cheese (moon cheese) — ladders back to the same universe.
+        </p>
+      </div>
+
+      <div style="text-align:center;">
+        <!-- Stylised logo lockup -->
+        <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:24px;padding:48px 32px;">
+          <div style="font-size:5rem; margin-bottom:12px;">🌕</div>
+          <div style="font-size:2.8rem; font-weight:900; letter-spacing:-2px; line-height:1;">
+            <span class="grad-text">Orbi</span>
+          </div>
+          <div style="font-size:1rem; font-weight:600; color:var(--text-muted); letter-spacing:4px; text-transform:uppercase; margin-top:6px;">
+            To the Moon
+          </div>
+          <div style="margin-top:24px; display:flex; gap:12px; justify-content:center; flex-wrap:wrap;">
+            <span class="tag">$STR</span>
+            <span class="tag-teal tag">Solana</span>
+            <span class="tag-gold tag">Play-to-Earn</span>
+          </div>
+        </div>
+
+        <div style="margin-top:20px; background:var(--bg-card);border:1px solid var(--border);border-radius:16px;padding:24px;">
+          <div style="font-size:1.6rem; font-weight:900; letter-spacing:-1px; color:#04041a; background:linear-gradient(135deg,#fffde7,#fbbf24,#f59e0b);border-radius:12px;padding:16px 24px; display:inline-block;">
+            ☆ STR ☆
+          </div>
+          <div style="margin-top:12px; font-size:0.8rem; color:var(--text-muted);">$STR token — the native in-game currency</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Colour Palette -->
+<section style="background: rgba(255,255,255,0.015); border-top:1px solid var(--border); border-bottom:1px solid var(--border);">
+  <div class="container">
+    <div class="text-center fade-in">
+      <span class="section-label">Visual Identity</span>
+      <h2 class="section-title">The Orbi Colour System</h2>
+      <p class="section-subtitle">Every colour has a purpose. The palette communicates space, mystery, value, and energy — all at once.</p>
+    </div>
+
+    <div class="palette-grid fade-in">
+      <div class="swatch">
+        <div class="swatch-color" style="background:#04041a;"></div>
+        <div class="swatch-info">
+          <div class="swatch-name">Void Black</div>
+          <div class="swatch-hex">#04041A</div>
+        </div>
+      </div>
+      <div class="swatch">
+        <div class="swatch-color" style="background:linear-gradient(135deg,#7c3aed,#a855f7);"></div>
+        <div class="swatch-info">
+          <div class="swatch-name">Orbi Purple</div>
+          <div class="swatch-hex">#7C3AED → #A855F7</div>
+        </div>
+      </div>
+      <div class="swatch">
+        <div class="swatch-color" style="background:linear-gradient(135deg,#3b82f6,#60a5fa);"></div>
+        <div class="swatch-info">
+          <div class="swatch-name">Nebula Blue</div>
+          <div class="swatch-hex">#3B82F6 → #60A5FA</div>
+        </div>
+      </div>
+      <div class="swatch">
+        <div class="swatch-color" style="background:linear-gradient(135deg,#f59e0b,#fbbf24);"></div>
+        <div class="swatch-info">
+          <div class="swatch-name">Star Gold</div>
+          <div class="swatch-hex">#F59E0B → #FBBF24</div>
+        </div>
+      </div>
+      <div class="swatch">
+        <div class="swatch-color" style="background:linear-gradient(135deg,#14b8a6,#2dd4bf);"></div>
+        <div class="swatch-info">
+          <div class="swatch-name">Cosmos Teal</div>
+          <div class="swatch-hex">#14B8A6 → #2DD4BF</div>
+        </div>
+      </div>
+      <div class="swatch">
+        <div class="swatch-color" style="background:linear-gradient(135deg,#ec4899,#f472b6);"></div>
+        <div class="swatch-info">
+          <div class="swatch-name">Aurora Pink</div>
+          <div class="swatch-hex">#EC4899 → #F472B6</div>
+        </div>
+      </div>
+      <div class="swatch">
+        <div class="swatch-color" style="background:radial-gradient(circle at 35% 35%, #fffde7, #e8e0b0, #7a7048);"></div>
+        <div class="swatch-info">
+          <div class="swatch-name">Moon Cream</div>
+          <div class="swatch-hex">#FFFDE7 → #7A7048</div>
+        </div>
+      </div>
+      <div class="swatch">
+        <div class="swatch-color" style="background:#c4c4e8;"></div>
+        <div class="swatch-info">
+          <div class="swatch-name">Stardust</div>
+          <div class="swatch-hex">#C4C4E8</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <!-- Colour usage rules -->
+    <div class="grid-3 fade-in">
+      <div class="card">
+        <h3 style="color:var(--accent-purple-lt);">🔮 Orbi Purple</h3>
+        <p>Primary brand colour. Used for CTAs, gradients, interactive elements, and highlights. The anchor of the Orbi visual identity.</p>
+      </div>
+      <div class="card">
+        <h3 style="color:var(--accent-gold);">⭐ Star Gold</h3>
+        <p>$STR token colour. Appears on any financial metric, earning event, or reward. Signals value and achievement.</p>
+      </div>
+      <div class="card">
+        <h3 style="color:var(--accent-teal);">🌊 Cosmos Teal</h3>
+        <p>Solana and blockchain layer colour. Used on chain-related UI, wallet connection states, and transaction confirmations.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Typography -->
+<section>
+  <div class="container">
+    <div class="fade-in">
+      <span class="section-label">Typography</span>
+      <h2 class="section-title">Type that feels like space</h2>
+      <p class="section-subtitle">Inter brings modern, legible, and trustworthy energy. Heavy weights for impact, light weights for breathing room.</p>
+    </div>
+
+    <div class="fade-in" style="margin-top:40px;">
+      <div class="type-specimen">
+        <div class="type-label">Display — Inter 900, −2px tracking</div>
+        <div style="font-size:3rem; font-weight:900; letter-spacing:-2px;" class="grad-text">Orbi: To the Moon</div>
+      </div>
+      <div class="type-specimen">
+        <div class="type-label">Headline — Inter 800, −1px tracking</div>
+        <div style="font-size:2rem; font-weight:800; letter-spacing:-1px;">Play. Earn. Stake. Repeat.</div>
+      </div>
+      <div class="type-specimen">
+        <div class="type-label">Body — Inter 400, 1.65 line-height</div>
+        <div style="font-size:1rem; color:var(--text-secondary); line-height:1.65;">
+          Orbi is a mobile-first crypto game built on Solana. Players earn $STR tokens through daily minigames,
+          manage an on-chain farm, open chests of rare items, and trade in the Orbi Marketplace — all for real value.
+        </div>
+      </div>
+      <div class="type-specimen">
+        <div class="type-label">Label / UI — Inter 700, 2px tracking, uppercase</div>
+        <div style="font-size:0.72rem; font-weight:700; letter-spacing:3px; text-transform:uppercase; color:var(--accent-purple-lt);">
+          Leaderboard · Daily Rewards · Cosmic Chest · Staking Pool
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Aesthetic & App Feel -->
+<section style="background: rgba(255,255,255,0.015); border-top:1px solid var(--border); border-bottom:1px solid var(--border);">
+  <div class="container">
+    <div class="text-center fade-in">
+      <span class="section-label">App Aesthetic</span>
+      <h2 class="section-title">How Orbi should <em>feel</em></h2>
+      <p class="section-subtitle">We want players to feel like they're actually on the Moon — a sense of depth, weightlessness, and cosmic wonder in every screen.</p>
+    </div>
+
+    <div class="grid-3 fade-in">
+      <div class="card">
+        <span class="card-icon">🌌</span>
+        <h3>Dark Cosmic UI</h3>
+        <p>Deep space backgrounds. Soft particle effects. Glassmorphism cards with subtle purple borders. Nothing harsh — everything glows softly like distant stars.</p>
+      </div>
+      <div class="card">
+        <span class="card-icon">✨</span>
+        <h3>Rarity = Visual Hierarchy</h3>
+        <p>Common items are silver-grey. Rare items glow blue. Epic pulse purple. Cosmic items shimmer with rainbow gradients and animated borders. Rarity is visible immediately.</p>
+      </div>
+      <div class="card">
+        <span class="card-icon">🎮</span>
+        <h3>Chunky, Tactile Controls</h3>
+        <p>Large tap targets. Satisfying haptic feedback on button presses and item openings. Reward animations (coins, stars bursting) on every earn event.</p>
+      </div>
+      <div class="card">
+        <span class="card-icon">🌕</span>
+        <h3>The Moon Character</h3>
+        <p>Central to the UI. Sits on the homepage. Reacts to energy/hunger state — happy when full, sleepy when low. Non-transferable, so it becomes truly <em>yours</em>.</p>
+      </div>
+      <div class="card">
+        <span class="card-icon">🧀</span>
+        <h3>Whimsical Details</h3>
+        <p>The moon eats cheese. Cows live on the farm. Seeds grow wheat in space. The absurdity is intentional — it's charming, shareable, and meme-native. Think among us meets crypto.</p>
+      </div>
+      <div class="card">
+        <span class="card-icon">📊</span>
+        <h3>Financial Clarity</h3>
+        <p>Token balances, staking yields, and marketplace prices are displayed cleanly and prominently. Players always know their position. Trust comes from transparency.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Voice & Tone -->
+<section>
+  <div class="container">
+    <div class="fade-in">
+      <span class="section-label">Brand Voice</span>
+      <h2 class="section-title">How Orbi speaks</h2>
+      <p class="section-subtitle">Our voice is what sets us apart in a sea of serious DeFi protocols and generic P2E clones.</p>
+    </div>
+
+    <div class="fade-in" style="margin-top:40px;">
+      <div class="voice-pair">
+        <div class="voice-do">
+          <div class="voice-label do-label">✅ Do</div>
+          "GM frens 🌕 today's leaderboard resets in 3 hours — top tier gets 500 $STR. Are you ready? Let's go to the moon 🚀"
+        </div>
+        <div class="voice-dont">
+          <div class="voice-label dont-label">❌ Don't</div>
+          "We are pleased to announce that the leaderboard distribution event will occur at the scheduled time per our tokenomics whitepaper."
+        </div>
+      </div>
+      <div class="voice-pair">
+        <div class="voice-do">
+          <div class="voice-label do-label">✅ Do</div>
+          "Your moon is hungry 🧀 Feed it before you lose your hunger bar. Cheese doesn't grow itself — unless you're farming."
+        </div>
+        <div class="voice-dont">
+          <div class="voice-label dont-label">❌ Don't</div>
+          "Users are advised to replenish their character's hunger metric via the farm resource generation system."
+        </div>
+      </div>
+      <div class="voice-pair">
+        <div class="voice-do">
+          <div class="voice-label do-label">✅ Do</div>
+          "Cosmic chest incoming 💫 We're adding a new rarity tier next week. Current holders of Epic items will receive a bonus airdrop — details soon."
+        </div>
+        <div class="voice-dont">
+          <div class="voice-label dont-label">❌ Don't</div>
+          "A forthcoming protocol update will introduce additional rarity classification for NFT assets. Compensation mechanisms are under review."
+        </div>
+      </div>
+    </div>
+
+    <div class="highlight-box fade-in" style="margin-top:32px;">
+      <h3 style="margin-bottom:20px;">Four Words that Define Our Voice</h3>
+      <div class="grid-4">
+        <div style="text-align:center;padding:20px;">
+          <div style="font-size:2rem;margin-bottom:8px;">😂</div>
+          <div style="font-weight:800;font-size:1.1rem;margin-bottom:6px;" class="grad-text">Playful</div>
+          <div style="font-size:0.85rem;color:var(--text-secondary);">We don't take ourselves too seriously. Memes are welcome. The Moon eats cheese.</div>
+        </div>
+        <div style="text-align:center;padding:20px;">
+          <div style="font-size:2rem;margin-bottom:8px;">🤝</div>
+          <div style="font-weight:800;font-size:1.1rem;margin-bottom:6px;" class="grad-gold">Community-First</div>
+          <div style="font-size:0.85rem;color:var(--text-secondary);">We talk with the community, not at them. Discord is where real decisions get discussed.</div>
+        </div>
+        <div style="text-align:center;padding:20px;">
+          <div style="font-size:2rem;margin-bottom:8px;">🔍</div>
+          <div style="font-weight:800;font-size:1.1rem;margin-bottom:6px;" style="background:var(--grad-teal);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">Transparent</div>
+          <div style="font-size:0.85rem;color:var(--text-secondary);">On-chain is our word. We show treasury addresses, burn proofs, and update roadmaps publicly.</div>
+        </div>
+        <div style="text-align:center;padding:20px;">
+          <div style="font-size:2rem;margin-bottom:8px;">⚡</div>
+          <div style="font-weight:800;font-size:1.1rem;margin-bottom:6px;color:var(--accent-purple-lt);">Energetic</div>
+          <div style="font-size:0.85rem;color:var(--text-secondary);">Short sentences. Emoji where they earn their place. Always moving, always building.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Target Personas -->
+<section style="background: rgba(255,255,255,0.015); border-top:1px solid var(--border); border-bottom:1px solid var(--border);">
+  <div class="container">
+    <div class="text-center fade-in">
+      <span class="section-label">Target Audience</span>
+      <h2 class="section-title">Three personas. One game for all of them.</h2>
+    </div>
+
+    <div class="grid-3 fade-in">
+      <div class="persona">
+        <span class="persona-avatar">🎓</span>
+        <div class="persona-name">Casey — The Student</div>
+        <div class="persona-role">Casual Crypto Curious</div>
+        <div class="persona-quote">"I've heard about crypto but it's all too complicated. I just want to try something fun that might make me some money."</div>
+        <div style="font-size:0.85rem;color:var(--text-secondary);line-height:1.6;">
+          <strong style="color:#fff;">Age:</strong> 19–24 &nbsp;|&nbsp; <strong style="color:#fff;">Devices:</strong> iPhone<br/>
+          <strong style="color:#fff;">Plays:</strong> Subway Surfers, mobile puzzles<br/>
+          <strong style="color:#fff;">Crypto XP:</strong> Heard of Bitcoin<br/>
+          <strong style="color:#fff;">Hook:</strong> Simple sign-up, fun minigames, potential earnings
+        </div>
+      </div>
+
+      <div class="persona">
+        <span class="persona-avatar">🚂</span>
+        <div class="persona-name">Alex — The Commuter</div>
+        <div class="persona-role">Time-Killing Power User</div>
+        <div class="persona-quote">"I need something to do on the tube. If I can earn while I play during my 45 minute commute, that's a win."</div>
+        <div style="font-size:0.85rem;color:var(--text-secondary);line-height:1.6;">
+          <strong style="color:#fff;">Age:</strong> 25–34 &nbsp;|&nbsp; <strong style="color:#fff;">Devices:</strong> iPhone<br/>
+          <strong style="color:#fff;">Plays:</strong> Clash of Clans, casual idle games<br/>
+          <strong style="color:#fff;">Crypto XP:</strong> Owns some ETH/SOL<br/>
+          <strong style="color:#fff;">Hook:</strong> Farm progress during commute, leaderboard competition
+        </div>
+      </div>
+
+      <div class="persona">
+        <span class="persona-avatar">🦍</span>
+        <div class="persona-name">Jordan — The Degen</div>
+        <div class="persona-role">On-chain Native</div>
+        <div class="persona-quote">"Show me the tokenomics. If the staking yield is real and the token can pump, I'm aping in day one."</div>
+        <div style="font-size:0.85rem;color:var(--text-secondary);line-height:1.6;">
+          <strong style="color:#fff;">Age:</strong> 22–35 &nbsp;|&nbsp; <strong style="color:#fff;">Devices:</strong> iPhone + Desktop<br/>
+          <strong style="color:#fff;">Plays:</strong> Axie, DeFi protocols, pump.fun<br/>
+          <strong style="color:#fff;">Crypto XP:</strong> Daily trader, Phantom wallet native<br/>
+          <strong style="color:#fff;">Hook:</strong> STR staking yield, marketplace arbitrage, early entry
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Marketing Channels -->
+<section>
+  <div class="container">
+    <div class="text-center fade-in">
+      <span class="section-label">Marketing Channels</span>
+      <h2 class="section-title">Where we build our community</h2>
+      <p class="section-subtitle">Crypto Twitter is the heartbeat of the space. We're already there — and we're expanding deliberately.</p>
+    </div>
+
+    <div class="grid-2 fade-in">
+      <div class="card">
+        <div class="channel-item">
+          <span class="channel-icon">𝕏</span>
+          <div>
+            <div style="font-size:1rem;font-weight:700;margin-bottom:4px;">
+              X (Crypto Twitter)
+              <span class="channel-priority priority-core">Core</span>
+            </div>
+            <div style="font-size:0.85rem;color:var(--text-secondary);line-height:1.6;">
+              <strong>@Orbi_solana</strong> — our main voice. Daily posts covering game updates, $STR price commentary, leaderboard callouts, memes, and community spotlights.
+              Crypto Twitter is where new users discover projects. Every viral post is worth thousands of marketing dollars.
+            </div>
+          </div>
+        </div>
+
+        <div class="channel-item">
+          <span class="channel-icon">💬</span>
+          <div>
+            <div style="font-size:1rem;font-weight:700;margin-bottom:4px;">
+              Discord
+              <span class="channel-priority priority-core">Core</span>
+            </div>
+            <div style="font-size:0.85rem;color:var(--text-secondary);line-height:1.6;">
+              Community hub for real-time conversation, support, bug reports, and community governance discussion.
+              Active discord.gg/JGgGFaPK already set up. Channels for game guides, trading, and dev announcements.
+              Discord engagement = retention.
+            </div>
+          </div>
+        </div>
+
+        <div class="channel-item" style="border-bottom:none;">
+          <span class="channel-icon">📱</span>
+          <div>
+            <div style="font-size:1rem;font-weight:700;margin-bottom:4px;">
+              TikTok / Instagram Reels
+              <span class="channel-priority priority-growth">Growth</span>
+            </div>
+            <div style="font-size:0.85rem;color:var(--text-secondary);line-height:1.6;">
+              Short-form video showing gameplay, earnings, unboxing chests, and farm progress.
+              Target: Gen Z students who don't follow Crypto Twitter yet. Organic reach
+              through "I made $X playing a phone game" hooks.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <!-- Sample tweets -->
+        <div style="display:flex;flex-direction:column;gap:16px;">
+          <div class="social-card">
+            <div class="social-header">
+              <div class="social-avatar">🌕</div>
+              <div>
+                <div class="social-handle">Orbi: To the Moon</div>
+                <div class="social-username">@Orbi_solana</div>
+              </div>
+            </div>
+            <div class="social-body">
+              Daily leaderboard just reset 🎯<br/><br/>
+              Top 3 players split 2,500 $STR today.<br/>
+              Tomorrow the pool grows by 10%.<br/><br/>
+              Are you in the top third? 🌕<br/>
+              <span class="social-hashtag">#Orbi #Solana #PlayToEarn #STR</span>
+            </div>
+            <div class="social-footer">
+              <span>❤️ 847</span>
+              <span>🔁 312</span>
+              <span>💬 94</span>
+            </div>
+          </div>
+
+          <div class="social-card">
+            <div class="social-header">
+              <div class="social-avatar">🌕</div>
+              <div>
+                <div class="social-handle">Orbi: To the Moon</div>
+                <div class="social-username">@Orbi_solana</div>
+              </div>
+            </div>
+            <div class="social-body">
+              cosmic chest incoming 💫<br/><br/>
+              new rarity tier drops next week.<br/>
+              current Epic holders get a bonus airdrop.<br/><br/>
+              ser, your moon is about to look very different 🧀
+              <span class="social-hashtag">#OrbiNFT #SolanaGaming</span>
+            </div>
+            <div class="social-footer">
+              <span>❤️ 1,203</span>
+              <span>🔁 567</span>
+              <span>💬 231</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- KOL & Growth tactics -->
+    <div class="grid-3 fade-in" style="margin-top:40px;">
+      <div class="card">
+        <span class="card-icon">🎤</span>
+        <h3>KOL Partnerships</h3>
+        <p>Onboard 3–5 Solana-native crypto influencers (10k–100k followers) as early beta testers. Organic posts from credible accounts beat paid ads in crypto culture.</p>
+      </div>
+      <div class="card">
+        <span class="card-icon">🪂</span>
+        <h3>Airdrop Campaign</h3>
+        <p>10% of $STR supply allocated to early Discord/X followers. Simple tasks: follow, retweet, join Discord. Creates viral growth loop and day-1 community.</p>
+      </div>
+      <div class="card">
+        <span class="card-icon">🏆</span>
+        <h3>Leaderboard Callouts</h3>
+        <p>Weekly tweet threads featuring top 10 players with wallet addresses (if public) and their $STR earnings. Community celebration = free marketing from proud players.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Competitive Differentiation -->
+<section style="background: rgba(255,255,255,0.015); border-top:1px solid var(--border); border-bottom:1px solid var(--border);">
+  <div class="container">
+    <div class="text-center fade-in">
+      <span class="section-label">Differentiation</span>
+      <h2 class="section-title">What makes Orbi unforgettable</h2>
+    </div>
+
+    <div class="grid-2 fade-in" style="align-items:start;">
+      <div style="display:flex;flex-direction:column;gap:20px;">
+        <div class="highlight-box">
+          <h3 style="margin-bottom:10px;">🌕 The Moon is yours</h3>
+          <p style="color:var(--text-secondary);font-size:0.9rem;line-height:1.65;">
+            Non-transferable NFT characters create emotional attachment. Your Moon levels up <em>with you</em>.
+            It's not a tradeable asset — it's a digital identity. This is the same psychological hook that makes
+            Pokémon and Tamagotchis sticky across generations.
+          </p>
+        </div>
+        <div class="highlight-box" style="background:linear-gradient(135deg,rgba(251,191,36,0.06),rgba(245,158,11,0.06));border-color:rgba(251,191,36,0.3);">
+          <h3 style="margin-bottom:10px;">⭐ $STR is the galaxy's currency</h3>
+          <p style="color:var(--text-secondary);font-size:0.9rem;line-height:1.65;">
+            Every token, every star, every reward in the game exists in the same cosmic universe.
+            Stars in the sky. STR in your wallet. The branding consistency makes the financial layer
+            feel natural — not tacked on.
+          </p>
+        </div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:20px;">
+        <div class="highlight-box" style="background:linear-gradient(135deg,rgba(20,184,166,0.06),rgba(59,130,246,0.06));border-color:rgba(20,184,166,0.3);">
+          <h3 style="margin-bottom:10px;">🧀 Absurdity as a feature</h3>
+          <p style="color:var(--text-secondary);font-size:0.9rem;line-height:1.65;">
+            Moon cheese. Space cows. Cosmic wheat. These details aren't accidental — they're shareable.
+            When a user posts "I just made cheese on the moon to feed my lunar cow", that's an organic
+            viral moment that no ad budget can replicate.
+          </p>
+        </div>
+        <div class="highlight-box" style="background:linear-gradient(135deg,rgba(236,72,153,0.06),rgba(245,158,11,0.06));border-color:rgba(236,72,153,0.3);">
+          <h3 style="margin-bottom:10px;">📈 Meme culture at its core</h3>
+          <p style="color:var(--text-secondary);font-size:0.9rem;line-height:1.65;">
+            "To the Moon" isn't a generic suffix — it's a rallying cry. It connects Orbi to every
+            crypto success story ever told. We're not chasing culture. We're built from it.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer class="footer">
+  <div class="container">
+    <div class="footer-inner">
+      <span class="footer-logo">☽ Orbi: To the Moon</span>
+      <div class="footer-links">
+        <a href="index.html">Landing</a>
+        <a href="technical.html">Technical</a>
+        <a href="strategy.html">Strategy</a>
+        <a href="brand.html">Brand</a>
+      </div>
+      <span>© 2024 Orbi Devs. Built on Solana.</span>
+    </div>
+  </div>
+</footer>
+
+<script src="script.js"></script>
+</body>
+</html>
