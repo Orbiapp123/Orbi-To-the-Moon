@@ -629,6 +629,82 @@ app = <span class="fn">FastAPI</span>()
   </div>
 </section>
 
+<!-- Liquidity & Token Launch -->
+<section style="background: rgba(255,255,255,0.015); border-top:1px solid var(--border); border-bottom:1px solid var(--border);">
+  <div class="container">
+    <div class="text-center fade-in">
+      <span class="section-label">Token Launch</span>
+      <h2 class="section-title">$STR Token Release, Liquidity &amp; Supply</h2>
+      <p class="section-subtitle">How $STR enters the market, how liquidity is structured, and how players are protected from day one.</p>
+    </div>
+
+    <div class="grid-2 fade-in" style="margin-top:40px;">
+
+      <!-- Phase 1: CLMM -->
+      <div class="card" style="border-color:rgba(20,184,166,0.3); background:linear-gradient(135deg,rgba(20,184,166,0.05),rgba(20,184,166,0.02));">
+        <span class="card-icon" style="font-size:1.6rem;">🚀</span>
+        <h3>Phase 1 — Initial Launch on Raydium CLMM</h3>
+        <p style="color:var(--text-secondary); font-size:0.9rem; margin-bottom:14px;">
+          The initial release of $STR will be done on <strong style="color:#fff;">Raydium</strong> using a <strong style="color:#2dd4bf;">CLMM (Concentrated Liquidity Market Maker)</strong> pool. This allows us to set our initial market cap without having to put forward large amounts of capital — liquidity is deployed within a chosen price range rather than across the entire curve, making it far more capital-efficient.
+        </p>
+        <p style="color:var(--text-secondary); font-size:0.9rem; margin-bottom:14px;">
+          At launch, <strong style="color:#fff;">LP (Liquidity Provider) tokens are burned</strong>. LP tokens represent ownership of the underlying pool assets. By burning them, no one — including the developers — can ever withdraw the initial liquidity. This is permanently verifiable on-chain.
+        </p>
+        <p style="color:var(--text-secondary); font-size:0.9rem;">
+          This gives players a verifiable guarantee that Orbi cannot be rugged at the liquidity level. The pool stays open, the tokens stay tradeable, and the devs cannot pull the floor out.
+        </p>
+        <div style="margin-top:16px;">
+          <span class="tag-teal tag">Raydium CLMM</span>
+          <span class="tag-teal tag">LP Burned at Launch</span>
+          <span class="tag-teal tag">Capital-Efficient</span>
+        </div>
+      </div>
+
+      <!-- Phase 2: DLMM -->
+      <div class="card" style="border-color:rgba(124,58,237,0.3); background:linear-gradient(135deg,rgba(124,58,237,0.05),rgba(124,58,237,0.02));">
+        <span class="card-icon" style="font-size:1.6rem;">💧</span>
+        <h3>Phase 2 — DLMM &amp; Community Liquidity (1–3 Days Post-Launch)</h3>
+        <p style="color:var(--text-secondary); font-size:0.9rem; margin-bottom:14px;">
+          Shortly after launch, a <strong style="color:#fff;">DLMM (Dynamic Liquidity Market Maker)</strong> pool will be created. Unlike a standard CLMM, a DLMM adjusts its bin structure dynamically as the price moves, reducing impermanent loss for liquidity providers.
+        </p>
+        <p style="color:var(--text-secondary); font-size:0.9rem; margin-bottom:14px;">
+          This pool is open to <strong style="color:#fff;">third parties and Orbi players</strong> — anyone can deposit their $STR into the pool and earn trading fees in return. This creates a powerful flywheel: players who hold $STR now have an additional reason to keep it rather than sell, since they can put it to work earning fees.
+        </p>
+        <p style="color:var(--text-secondary); font-size:0.9rem;">
+          The more players participate, the deeper the liquidity, the tighter the spreads, and the harder it becomes for any single actor to move the price — further stabilising $STR for the entire ecosystem.
+        </p>
+        <div style="margin-top:16px;">
+          <span class="tag">Dynamic Liquidity</span>
+          <span class="tag">Community-Owned Pool</span>
+          <span class="tag">Fee Earning</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Summary row -->
+    <div class="highlight-box fade-in" style="margin-top:40px;">
+      <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:32px; text-align:center;">
+        <div>
+          <div style="font-size:1.6rem; font-weight:800; background:var(--grad-primary);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">CLMM</div>
+          <div style="font-size:0.8rem; color:var(--text-secondary); margin-top:6px;">Launch mechanism — capital-efficient, price-range liquidity</div>
+        </div>
+        <div>
+          <div style="font-size:1.6rem; font-weight:800; background:var(--grad-teal);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">Burned LP</div>
+          <div style="font-size:0.8rem; color:var(--text-secondary); margin-top:6px;">Locked liquidity forever — verifiable on-chain, no rug possible</div>
+        </div>
+        <div>
+          <div style="font-size:1.6rem; font-weight:800; color:#fff;">1–3 Days</div>
+          <div style="font-size:0.8rem; color:var(--text-secondary); margin-top:6px;">Until DLMM opens for community liquidity providers</div>
+        </div>
+        <div>
+          <div style="font-size:1.6rem; font-weight:800; background:var(--grad-gold);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">Fees → Players</div>
+          <div style="font-size:0.8rem; color:var(--text-secondary); margin-top:6px;">Pool trading fees earned by anyone who provides liquidity</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
 <footer class="footer">
   <div class="container">
     <div class="footer-inner">
