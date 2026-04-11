@@ -205,7 +205,7 @@
     <div class="text-center fade-in">
       <span class="section-label">System Architecture</span>
       <h2 class="section-title">Three layers. One seamless experience.</h2>
-      <p class="section-subtitle">Each layer has a single, clear responsibility — frontend renders and connects wallets, backend indexes and serves data, blockchain handles ownership and value.</p>
+      <p class="section-subtitle">Each layer has a single, clear responsibility — frontend renders and connects wallets, backend indexes and serves data, blockchain handles true ownership of accessories, $STR, and SOL.</p>
     </div>
 
     <div class="arch-diagram fade-in">
@@ -261,36 +261,49 @@
     <div class="fade-in">
       <span class="section-label">Layer 1</span>
       <h2 class="section-title">Frontend</h2>
-      <p class="section-subtitle">A lightweight, no-framework stack keeps the game fast, auditable, and easy to embed in an iOS WebView wrapper.</p>
+      <p class="section-subtitle">As of now, a lightweight, no-framework stack keeps the game fast, auditable, and easy to embed in an iOS WebView wrapper — which would be the next step having now built a working prototype on GitHub. That's what we need from a professional web designer: take this prototype and wrap it in a native iOS shell.</p>
     </div>
 
     <div class="grid-2 fade-in">
       <div>
         <h3 style="margin-bottom:16px; font-size:1.1rem;">Wallet Integration</h3>
-        <p style="color:var(--text-secondary); font-size:0.92rem; margin-bottom:16px;">
-          The Phantom wallet SDK provides a <code style="background:rgba(255,255,255,0.08);padding:2px 6px;border-radius:4px;font-size:0.82rem;">window.solana</code> object.
+        <p style="color:var(--text-secondary); font-size:0.92rem; margin-bottom:8px;">
+          The Phantom Wallet React Native SDK provides a <code style="background:rgba(255,255,255,0.08);padding:2px 6px;border-radius:4px;font-size:0.82rem;">window.solana</code> object.
           Users connect once and sign transactions without leaving the app. All key management
           stays in Phantom — Orbi never touches private keys.
         </p>
-        <div class="code-block"><span class="cm">// Connect Phantom wallet</span>
+        <p style="color:var(--text-secondary); font-size:0.92rem; margin-bottom:8px;">
+          When a user connects their Phantom wallet, the SDK returns their <strong style="color:#fff;">public key</strong> — a unique wallet address that identifies them on-chain. This becomes their player ID throughout the entire game. Orbi stores only this public key; the private key never leaves the user's device.
+        </p>
+        <p style="color:var(--text-secondary); font-size:0.92rem; margin-bottom:16px;">
+          Because the app is built in JavaScript, the Phantom Wallet React Native SDK works on both <strong style="color:#fff;">iOS and Android</strong> — so the codebase won't be redundant if we expand to Android later. No rewrite required.
+        </p>
+        <div class="code-block"><span class="cm">// Connect Phantom wallet — outputs user's public key</span>
 <span class="kw">const</span> provider = window.solana;
 <span class="kw">if</span> (provider?.isPhantom) {
   <span class="kw">const</span> resp = <span class="kw">await</span> provider.<span class="fn">connect</span>();
   <span class="kw">const</span> pubkey = resp.publicKey.<span class="fn">toString</span>();
+  <span class="cm">// pubkey is now the player's on-chain wallet address</span>
+  <span class="cm">// e.g. "7xKXtg2CW87d97TXJSDpbD5jBkheTqA83TZRuJosgHU"</span>
   <span class="fn">console</span>.<span class="fn">log</span>(<span class="st">"Connected:"</span>, pubkey);
 }</div>
+
+        <div style="margin-top:20px; background:rgba(124,58,237,0.07); border:1px solid rgba(168,85,247,0.2); border-radius:var(--radius); padding:16px;">
+          <p style="font-size:0.85rem; color:var(--text-secondary); margin:0;"><strong style="color:var(--accent-purple-lt);">What is an iOS WebView Wrapper?</strong><br/><br/>
+          An iOS WebView wrapper is a native iPhone app shell that contains a website inside it. Instead of building the entire app in Swift, you create: (1) an iOS app container, (2) with a WebView component inside it, (3) and that WebView loads your web app. The user sees and interacts with a normal iPhone app — they'd never know it's a website running inside it. This is the standard approach for shipping a web prototype as an App Store app.</p>
+        </div>
       </div>
 
       <div>
         <h3 style="margin-bottom:16px; font-size:1.1rem;">Tech Stack</h3>
         <div class="tech-stack-row">
-          <span class="tech-pill">🌐 HTML5</span>
-          <span class="tech-pill">🎨 CSS3 + Custom Props</span>
-          <span class="tech-pill">⚡ Vanilla JS</span>
-          <span class="tech-pill">👻 Phantom Wallet SDK</span>
-          <span class="tech-pill">📦 @solana/web3.js</span>
-          <span class="tech-pill">📱 iOS WebView</span>
-          <span class="tech-pill">🔄 Fetch API</span>
+          <span class="tech-pill">HTML5</span>
+          <span class="tech-pill">CSS3</span>
+          <span class="tech-pill">Vanilla JS</span>
+          <span class="tech-pill">Phantom Wallet React Native SDK</span>
+          <span class="tech-pill">@solana/web3.js</span>
+          <span class="tech-pill">iOS WebView</span>
+          <span class="tech-pill">Fetch API</span>
         </div>
         <div style="margin-top:24px;">
           <h3 style="margin-bottom:12px; font-size:1.1rem;">Sending a Transaction</h3>
@@ -316,7 +329,14 @@ tx.recentBlockhash = (<span class="kw">await</span>
     <div class="fade-in">
       <span class="section-label">Layer 2</span>
       <h2 class="section-title">Python Backend</h2>
-      <p class="section-subtitle">FastAPI serves low-latency REST endpoints. A background indexer listens to Solana events and keeps the database in sync.</p>
+      <p class="section-subtitle">The Python backend responds quickly to app requests, while another background process watches the blockchain and updates the app's stored data. FastAPI serves low-latency REST endpoints; a separate background indexer listens to Solana events and keeps the database in sync.</p>
+
+      <div style="background:rgba(59,130,246,0.07); border:1px solid rgba(59,130,246,0.25); border-radius:var(--radius); padding:20px; margin-top:24px;">
+        <p style="font-size:0.9rem; color:var(--text-secondary); margin:0;">
+          <strong style="color:#60a5fa;">What is REST?</strong><br/><br/>
+          REST is a standard way of designing an API so the frontend can talk to the backend through clear URL-based endpoints. Each endpoint does a specific job, and standard HTTP methods are used to show the type of action: for example, <code style="background:rgba(255,255,255,0.08);padding:2px 6px;border-radius:4px;font-size:0.82rem;">GET</code> fetches data and <code style="background:rgba(255,255,255,0.08);padding:2px 6px;border-radius:4px;font-size:0.82rem;">POST</code> sends or triggers an action. In Orbi, routes like <code style="background:rgba(255,255,255,0.08);padding:2px 6px;border-radius:4px;font-size:0.82rem;">/player/{wallet}</code> or <code style="background:rgba(255,255,255,0.08);padding:2px 6px;border-radius:4px;font-size:0.82rem;">/leaderboard</code> are REST API endpoints, and the backend returns the requested information, usually in JSON format.
+        </p>
+      </div>
     </div>
 
     <div class="grid-2 fade-in">
@@ -330,7 +350,7 @@ tx.recentBlockhash = (<span class="kw">await</span>
             <span style="color:var(--accent-purple-lt);">▸</span> Store item metadata: rarity, accessories, chest type, owner history
           </li>
           <li style="display:flex;gap:12px;padding:12px 0;border-bottom:1px solid var(--border);font-size:0.9rem;color:var(--text-secondary);">
-            <span style="color:var(--accent-purple-lt);">▸</span> Compute and cache leaderboard rankings every 24 hours
+            <span style="color:var(--accent-purple-lt);">▸</span> Compute and cache leaderboard rankings — <span style="background:rgba(251,191,36,0.15); color:#fbbf24; padding:1px 6px; border-radius:4px; font-size:0.8rem; font-weight:600;">⚠ DECISION NEEDED: update frequency (every 1hr / 6hr / 24hr?)</span>
           </li>
           <li style="display:flex;gap:12px;padding:12px 0;border-bottom:1px solid var(--border);font-size:0.9rem;color:var(--text-secondary);">
             <span style="color:var(--accent-purple-lt);">▸</span> Serve player profiles, inventory, energy/hunger bar state
@@ -343,13 +363,13 @@ tx.recentBlockhash = (<span class="kw">await</span>
         <div style="margin-top:24px;">
           <h3 style="margin-bottom:12px; font-size:1.1rem;">Tech Stack</h3>
           <div class="tech-stack-row">
-            <span class="tech-pill">🐍 Python 3.11</span>
-            <span class="tech-pill">⚡ FastAPI</span>
-            <span class="tech-pill">🐘 PostgreSQL</span>
-            <span class="tech-pill">🔴 Redis</span>
-            <span class="tech-pill">📡 solana-py</span>
-            <span class="tech-pill">🔄 APScheduler</span>
-            <span class="tech-pill">🐳 Docker</span>
+            <span class="tech-pill">Python 3.11</span>
+            <span class="tech-pill">FastAPI</span>
+            <span class="tech-pill">PostgreSQL</span>
+            <span class="tech-pill">Redis</span>
+            <span class="tech-pill">solana-py</span>
+            <span class="tech-pill">APScheduler</span>
+            <span class="tech-pill">Docker</span>
           </div>
         </div>
       </div>
@@ -454,7 +474,18 @@ app = <span class="fn">FastAPI</span>()
     <div class="fade-in">
       <span class="section-label">Layer 3</span>
       <h2 class="section-title">Solana Smart Contract (Rust + Anchor)</h2>
-      <p class="section-subtitle">All game logic that involves real value — registration, chest purchase, marketplace trades, staking — lives on-chain. Rust guarantees it can't be tampered with.</p>
+      <p class="section-subtitle">All game logic that involves real value — registration, chest purchase, marketplace trades, staking — lives on-chain. It's important to understand the distinction between the two technologies used here:</p>
+
+      <div class="grid-2 fade-in" style="margin-top:24px; margin-bottom:0;">
+        <div style="background:rgba(20,184,166,0.06); border:1px solid rgba(20,184,166,0.2); border-radius:var(--radius); padding:20px;">
+          <h4 style="color:#2dd4bf; margin-bottom:8px;">What is Rust?</h4>
+          <p style="font-size:0.88rem; color:var(--text-secondary); margin:0;">Rust is the <strong style="color:#fff;">programming language</strong> the smart contract is written in. It's chosen because it compiles to extremely efficient bytecode that runs on Solana, and its type system prevents entire categories of bugs — like memory corruption — at compile time. Rust is what guarantees the contract can't be tampered with or exploited at the language level.</p>
+        </div>
+        <div style="background:rgba(124,58,237,0.06); border:1px solid rgba(124,58,237,0.2); border-radius:var(--radius); padding:20px;">
+          <h4 style="color:var(--accent-purple-lt); margin-bottom:8px;">What is Anchor?</h4>
+          <p style="font-size:0.88rem; color:var(--text-secondary); margin:0;">Anchor is a <strong style="color:#fff;">framework built on top of Rust</strong> that makes writing Solana programs much faster and safer. It handles the boilerplate of account validation, serialisation, and error handling through simple macros like <code style="background:rgba(255,255,255,0.08);padding:2px 6px;border-radius:4px;font-size:0.8rem;">#[account]</code> and <code style="background:rgba(255,255,255,0.08);padding:2px 6px;border-radius:4px;font-size:0.8rem;">#[program]</code>. Think of Rust as the engine and Anchor as the framework that gives it structure — the way React is built on JavaScript.</p>
+        </div>
+      </div>
     </div>
 
     <div class="grid-2 fade-in">
@@ -583,8 +614,8 @@ app = <span class="fn">FastAPI</span>()
       <div class="security-item">
         <div class="security-num">4</div>
         <div>
-          <h4 style="margin-bottom:6px;">Locked Liquidity</h4>
-          <p style="font-size:0.9rem; color:var(--text-secondary);">LP tokens are burned at launch on Raydium, making the liquidity pool permanently locked. Players can verify this on-chain — no team can rug the pool.</p>
+          <h4 style="margin-bottom:6px;">Locked Liquidity — Raydium CLMM</h4>
+          <p style="font-size:0.9rem; color:var(--text-secondary);">$STR launches on <strong style="color:#fff;">Raydium's Concentrated Liquidity Market Maker (CLMM)</strong> — Solana's leading DEX. At launch, the initial SOL + $STR liquidity is deposited into the pool and the resulting LP (Liquidity Provider) tokens are permanently burned. Burning LP tokens means no one — including the developers — can ever withdraw the underlying liquidity. This is fully verifiable on-chain, eliminating rug-pull risk entirely. CLMM allows liquidity to be concentrated in specific price ranges, meaning tighter spreads and less slippage for traders compared to a standard AMM pool.</p>
         </div>
       </div>
       <div class="security-item">
