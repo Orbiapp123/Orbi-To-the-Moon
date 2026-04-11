@@ -1,0 +1,575 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Orbi: To the Moon — Landing</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    /* ── Page-specific styles ── */
+    .hero {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 0 24px;
+      position: relative;
+    }
+
+    .hero-glow {
+      position: absolute;
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      width: 700px; height: 700px;
+      background: radial-gradient(circle, rgba(124,58,237,0.12) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    .hero-content { position: relative; z-index: 1; max-width: 860px; }
+
+    .hero-eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(124, 58, 237, 0.12);
+      border: 1px solid rgba(168, 85, 247, 0.4);
+      color: var(--accent-purple-lt);
+      font-size: 0.8rem;
+      font-weight: 700;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      padding: 8px 20px;
+      border-radius: 100px;
+      margin-bottom: 28px;
+    }
+
+    .hero-eyebrow .dot {
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: var(--accent-purple-lt);
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.5; transform: scale(1.5); }
+    }
+
+    .hero h1 {
+      font-size: clamp(3rem, 8vw, 6rem);
+      font-weight: 900;
+      letter-spacing: -2px;
+      line-height: 1.0;
+      margin-bottom: 24px;
+    }
+
+    .hero h1 .moon { display: block; font-size: 5rem; line-height: 1.1; }
+
+    .hero-sub {
+      font-size: clamp(1rem, 2.5vw, 1.3rem);
+      color: var(--text-secondary);
+      max-width: 620px;
+      margin: 0 auto 40px;
+      line-height: 1.65;
+    }
+
+    .hero-btns {
+      display: flex;
+      gap: 16px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .hero-scroll {
+      position: absolute;
+      bottom: 36px; left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      color: var(--text-muted);
+      font-size: 0.75rem;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      animation: bounce 2.4s infinite;
+    }
+
+    .scroll-line {
+      width: 1px; height: 40px;
+      background: linear-gradient(180deg, var(--accent-purple), transparent);
+    }
+
+    @keyframes bounce {
+      0%, 100% { transform: translateX(-50%) translateY(0); }
+      50% { transform: translateX(-50%) translateY(8px); }
+    }
+
+    /* ── Concept section ── */
+    .concept-split {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 60px;
+      align-items: center;
+    }
+
+    @media (max-width: 768px) { .concept-split { grid-template-columns: 1fr; } }
+
+    .concept-visual {
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .moon-graphic {
+      width: 280px; height: 280px;
+      border-radius: 50%;
+      background: radial-gradient(circle at 35% 35%,
+        #fffde7 0%, #fff9c4 20%, #e8e0b0 50%, #b0a87a 80%, #7a7048 100%);
+      box-shadow:
+        0 0 60px rgba(251, 191, 36, 0.25),
+        0 0 120px rgba(251, 191, 36, 0.10),
+        inset -30px -20px 60px rgba(0,0,0,0.35);
+      position: relative;
+    }
+
+    .moon-graphic::before {
+      content: '';
+      position: absolute;
+      top: 28%; left: 22%;
+      width: 42px; height: 42px;
+      border-radius: 50%;
+      background: rgba(0,0,0,0.18);
+      box-shadow: inset 4px 4px 12px rgba(0,0,0,0.3);
+    }
+
+    .moon-graphic::after {
+      content: '';
+      position: absolute;
+      top: 52%; left: 55%;
+      width: 26px; height: 26px;
+      border-radius: 50%;
+      background: rgba(0,0,0,0.14);
+      box-shadow: inset 3px 3px 8px rgba(0,0,0,0.25);
+    }
+
+    .moon-orbit {
+      position: absolute;
+      width: 360px; height: 360px;
+      border-radius: 50%;
+      border: 1px dashed rgba(124, 58, 237, 0.3);
+      animation: orbit-spin 18s linear infinite;
+    }
+
+    .orbit-token {
+      position: absolute;
+      top: -12px; left: 50%;
+      transform: translateX(-50%);
+      background: var(--grad-primary);
+      width: 24px; height: 24px;
+      border-radius: 50%;
+      font-size: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      box-shadow: 0 0 12px rgba(124, 58, 237, 0.7);
+    }
+
+    @keyframes orbit-spin {
+      from { transform: rotate(0deg); }
+      to   { transform: rotate(360deg); }
+    }
+
+    /* ── Feature flags ── */
+    .feature-list { list-style: none; }
+    .feature-list li {
+      display: flex;
+      align-items: flex-start;
+      gap: 14px;
+      padding: 12px 0;
+      border-bottom: 1px solid var(--border);
+      font-size: 0.95rem;
+      color: var(--text-secondary);
+    }
+    .feature-list li:last-child { border-bottom: none; }
+
+    .feature-list .icon {
+      width: 28px; height: 28px;
+      border-radius: 8px;
+      background: rgba(124, 58, 237, 0.15);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+
+    /* ── Stats bar ── */
+    .stats-bar {
+      background: rgba(255,255,255,0.03);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 48px 40px;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 32px;
+    }
+
+    .stats-divider {
+      width: 1px;
+      background: var(--border);
+    }
+
+    /* ── Why Solana ── */
+    .solana-card {
+      background: linear-gradient(135deg, rgba(20,184,166,0.06), rgba(59,130,246,0.06));
+      border: 1px solid rgba(20,184,166,0.2);
+    }
+
+    /* ── Feasibility ── */
+    .feasibility-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 24px;
+    }
+
+    /* ── CTA Section ── */
+    .cta-section {
+      text-align: center;
+      padding: 100px 0;
+    }
+
+    .cta-box {
+      background: linear-gradient(135deg, rgba(124,58,237,0.1), rgba(59,130,246,0.1));
+      border: 1px solid var(--border-bright);
+      border-radius: 24px;
+      padding: 80px 60px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .cta-box::before {
+      content: '';
+      position: absolute;
+      top: -100px; left: 50%;
+      transform: translateX(-50%);
+      width: 600px; height: 300px;
+      background: radial-gradient(ellipse, rgba(124,58,237,0.15) 0%, transparent 70%);
+    }
+
+    .cta-box h2 {
+      font-size: clamp(1.8rem, 4vw, 3rem);
+      font-weight: 900;
+      letter-spacing: -1px;
+      margin-bottom: 16px;
+      position: relative;
+    }
+
+    .cta-box p {
+      font-size: 1.05rem;
+      color: var(--text-secondary);
+      margin-bottom: 40px;
+      max-width: 520px;
+      margin-left: auto;
+      margin-right: auto;
+      position: relative;
+    }
+
+    /* ── Fade-in ── */
+    .fade-in {
+      opacity: 0;
+      transform: translateY(28px);
+      transition: opacity 0.6s ease, transform 0.6s ease;
+    }
+    .fade-in.visible { opacity: 1; transform: translateY(0); }
+  </style>
+</head>
+<body>
+
+<canvas id="stars-canvas"></canvas>
+
+<!-- Navigation -->
+<nav class="navbar">
+  <div class="nav-inner">
+    <span class="nav-logo">☽ Orbi</span>
+    <ul class="nav-links">
+      <li><a href="index.html">Landing</a></li>
+      <li><a href="technical.html">Technical</a></li>
+      <li><a href="strategy.html">Strategy</a></li>
+      <li><a href="brand.html">Brand</a></li>
+      <li><a href="game-hub.html" class="nav-cta">🎮 Play Demo →</a></li>
+    </ul>
+  </div>
+</nav>
+
+<!-- Hero -->
+<section class="hero">
+  <div class="hero-glow"></div>
+  <div class="hero-content">
+    <div class="hero-eyebrow">
+      <span class="dot"></span>
+      Now Building on Solana
+    </div>
+    <h1>
+      <span class="grad-text">Orbi</span>
+      <span class="moon">🌕</span>
+      <span class="grad-text">To the Moon</span>
+    </h1>
+    <p class="hero-sub">
+      A play-to-earn mobile game blending casual gaming with real on-chain ownership.
+      Earn <strong>$STR</strong>, trade rare items, stake for yield — all on Solana.
+    </p>
+    <div class="hero-btns">
+      <a href="strategy.html" class="btn btn-primary">See the Opportunity →</a>
+      <a href="technical.html" class="btn btn-outline">Technical Overview</a>
+    </div>
+  </div>
+  <div class="hero-scroll">
+    <span>Scroll</span>
+    <div class="scroll-line"></div>
+  </div>
+</section>
+
+<!-- Core Concept -->
+<section>
+  <div class="container">
+    <div class="concept-split">
+      <div class="fade-in">
+        <span class="section-label">Core Concept</span>
+        <h2 class="section-title">One game. Real rewards.<br>Zero friction.</h2>
+        <p style="color:var(--text-secondary); margin-bottom:32px; font-size:0.98rem;">
+          Orbi is a mobile-first game built for iOS. Players pay a one-time
+          <strong style="color:#fff;">1 SOL entry fee</strong> to receive their Moon character —
+          non-transferable, ensuring organic progression. From there, they play
+          minigames, manage a farm, open chests, and trade in the marketplace.
+          Every action flows through the native <strong style="color:#fff;">$STR token</strong>.
+        </p>
+        <ul class="feature-list">
+          <li>
+            <span class="icon">🎮</span>
+            <div><strong style="color:#fff;">Daily Minigames</strong> — Helix Jump, Flappy-style games and more.
+            Tiered leaderboard payouts in $STR every 24 hours.</div>
+          </li>
+          <li>
+            <span class="icon">🌾</span>
+            <div><strong style="color:#fff;">On-chain Farming</strong> — Grow wheat → feed cows → produce milk → make cheese.
+            Cheese replenishes the hunger bar to keep playing.</div>
+          </li>
+          <li>
+            <span class="icon">📦</span>
+            <div><strong style="color:#fff;">Chest System</strong> — Common to Cosmic rarity. Proceeds fund the staking
+            treasury, creating a self-sustaining economy.</div>
+          </li>
+          <li>
+            <span class="icon">💱</span>
+            <div><strong style="color:#fff;">Marketplace</strong> — Trade accessories, cows &amp; items peer-to-peer in SOL.
+            Developers earn 1% on every transaction.</div>
+          </li>
+          <li>
+            <span class="icon">🔒</span>
+            <div><strong style="color:#fff;">Staking</strong> — Lock $STR for fixed periods to earn yield, funded
+            entirely by chest revenue — not token inflation.</div>
+          </li>
+        </ul>
+      </div>
+
+      <div class="fade-in" style="transition-delay:0.15s;">
+        <div class="concept-visual">
+          <div class="moon-orbit">
+            <div class="orbit-token">★</div>
+          </div>
+          <div class="moon-graphic"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Market Proof -->
+<section style="background: rgba(255,255,255,0.015); border-top:1px solid var(--border); border-bottom:1px solid var(--border);">
+  <div class="container">
+    <div class="text-center fade-in">
+      <span class="section-label">Market Proof</span>
+      <h2 class="section-title">The demand is already there</h2>
+      <p class="section-subtitle">
+        Casual gaming + crypto ownership is proven. Orbi targets the overlap.
+      </p>
+    </div>
+
+    <div class="stats-bar fade-in">
+      <div class="stat-block">
+        <div class="stat-number grad-text" data-count="4000" data-suffix="M+">0</div>
+        <div class="stat-label">Subway Surfers downloads</div>
+      </div>
+      <div class="stat-block">
+        <div class="stat-number grad-gold" data-count="165" data-suffix="M">0</div>
+        <div class="stat-label">Subway Surfers revenue ($USD)</div>
+      </div>
+      <div class="stat-block">
+        <div class="stat-number" style="background:var(--grad-teal);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;" data-count="12" data-suffix="M+">0</div>
+        <div class="stat-label">Crypto game txns last 30 days</div>
+      </div>
+      <div class="stat-block">
+        <div class="stat-number" style="background:linear-gradient(135deg,#ec4899,#f59e0b);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;" data-count="90" data-suffix="M">0</div>
+        <div class="stat-label">Peak market cap of 'Addicted' ($WEED)</div>
+      </div>
+    </div>
+
+    <div class="grid-3 mt-40 fade-in">
+      <div class="card">
+        <span class="card-icon">📱</span>
+        <h3>Mobile-First Design</h3>
+        <p>Low-friction, casual gameplay inspired by 'Pou' (100M+ downloads) and Clash of Clans. Designed for commuters, students, and casual crypto users alike.</p>
+      </div>
+      <div class="card">
+        <span class="card-icon">🎯</span>
+        <h3>Proven Competitor Blueprint</h3>
+        <p>'Addicted' (Solana) hit a $90M market cap with $4M in first-24-hour revenue using a near-identical one-time fee + farming model. Orbi improves on its deflationary design.</p>
+      </div>
+      <div class="card">
+        <span class="card-icon">🔥</span>
+        <h3>Meme Culture Momentum</h3>
+        <p>From DOGE to pump.fun, meme-driven crypto projects command massive communities. Orbi's cosmic branding and Moon character tap directly into this culture.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Industry Suitability & Feasibility -->
+<section>
+  <div class="container">
+    <div class="text-center fade-in">
+      <span class="section-label">Industry Fit</span>
+      <h2 class="section-title">Built for where crypto gaming is heading</h2>
+      <p class="section-subtitle">
+        Orbi sits at the intersection of two booming sectors: mobile casual gaming and blockchain-native economies.
+      </p>
+    </div>
+
+    <div class="feasibility-grid fade-in">
+      <div class="card">
+        <span class="card-icon">⛓️</span>
+        <h3>Solana: The Right Chain</h3>
+        <p>Sub-cent transaction fees and 65,000 TPS mean game mechanics that are impossible on Ethereum are trivial on Solana. Players can interact with the chain dozens of times per day without financial friction.</p>
+        <div style="margin-top:16px;">
+          <span class="tag-teal tag">Low Fees</span>
+          <span class="tag-teal tag">High TPS</span>
+          <span class="tag-teal tag">Growing Ecosystem</span>
+        </div>
+      </div>
+
+      <div class="card">
+        <span class="card-icon">🏗️</span>
+        <h3>Anchor Framework</h3>
+        <p>Smart contracts are built with Rust + Anchor, the industry-standard Solana development framework. Type-safe, auditable, and battle-tested by hundreds of Solana dApps.</p>
+        <div style="margin-top:16px;">
+          <span class="tag">Rust</span>
+          <span class="tag">Anchor</span>
+          <span class="tag">Testnet First</span>
+        </div>
+      </div>
+
+      <div class="card">
+        <span class="card-icon">💰</span>
+        <h3>Sustainable Tokenomics</h3>
+        <p>Unlike Axie Infinity (no supply cap, $10B crash), $STR has controlled emission through deflationary burning, staking sinks, and chest-funded treasury rewards rather than uncapped minting.</p>
+        <div style="margin-top:16px;">
+          <span class="tag-gold tag">Deflationary</span>
+          <span class="tag-gold tag">Staking Sink</span>
+          <span class="tag-gold tag">Fixed Supply</span>
+        </div>
+      </div>
+
+      <div class="card">
+        <span class="card-icon">🛡️</span>
+        <h3>Bot Resistance</h3>
+        <p>Energy and hunger bars cap daily playable time, making botting economically unattractive. The non-transferable Moon character prevents Sybil attacks and multiple-account farming.</p>
+      </div>
+
+      <div class="card">
+        <span class="card-icon">📈</span>
+        <h3>Early Adopter Flywheel</h3>
+        <p>The 1 SOL entry fee and XP-gated chest system rewards early players with better item access, creating genuine first-mover advantage and community FOMO.</p>
+      </div>
+
+      <div class="card">
+        <span class="card-icon">🔄</span>
+        <h3>Semi-Circular Economy</h3>
+        <p>Chest purchases → staking treasury → rewards to stakers. The Marketplace (SOL) generates dev revenue. Two distinct revenue loops reinforce each other rather than competing.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Why Orbi Beats Competitors -->
+<section style="background: rgba(255,255,255,0.015); border-top:1px solid var(--border); border-bottom:1px solid var(--border);">
+  <div class="container">
+    <div class="fade-in">
+      <span class="section-label">Competitive Edge</span>
+      <h2 class="section-title">Learning from what came before</h2>
+    </div>
+
+    <div class="grid-2 fade-in" style="margin-top:48px;">
+      <div class="card" style="border-color:rgba(239,68,68,0.25); background:rgba(239,68,68,0.04);">
+        <h3 style="color:#f87171;">⚠️ Axie Infinity — What went wrong</h3>
+        <ul style="list-style:none; margin-top:12px;">
+          <li style="padding:8px 0; border-bottom:1px solid rgba(239,68,68,0.1); color:var(--text-secondary); font-size:0.9rem;">❌ No token supply cap → runaway inflation</li>
+          <li style="padding:8px 0; border-bottom:1px solid rgba(239,68,68,0.1); color:var(--text-secondary); font-size:0.9rem;">❌ 3.5 ETH entry barrier → excluded casual players</li>
+          <li style="padding:8px 0; border-bottom:1px solid rgba(239,68,68,0.1); color:var(--text-secondary); font-size:0.9rem;">❌ Selling was more profitable than playing</li>
+          <li style="padding:8px 0; color:var(--text-secondary); font-size:0.9rem;">❌ No staking sink to absorb sell pressure</li>
+        </ul>
+      </div>
+
+      <div class="card" style="border-color:rgba(34,197,94,0.25); background:rgba(34,197,94,0.04);">
+        <h3 style="color:#4ade80;">✅ Orbi — How we fix it</h3>
+        <ul style="list-style:none; margin-top:12px;">
+          <li style="padding:8px 0; border-bottom:1px solid rgba(34,197,94,0.1); color:var(--text-secondary); font-size:0.9rem;">✅ Fixed $STR supply with deflationary burning</li>
+          <li style="padding:8px 0; border-bottom:1px solid rgba(34,197,94,0.1); color:var(--text-secondary); font-size:0.9rem;">✅ Only 1 SOL entry — accessible to casual users</li>
+          <li style="padding:8px 0; border-bottom:1px solid rgba(34,197,94,0.1); color:var(--text-secondary); font-size:0.9rem;">✅ Playing and progressing required to keep earning</li>
+          <li style="padding:8px 0; color:var(--text-secondary); font-size:0.9rem;">✅ Staking treasury absorbs sell pressure organically</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="cta-section">
+  <div class="container">
+    <div class="cta-box fade-in">
+      <h2>Ready to explore the full picture?</h2>
+      <p>Dive into our technical architecture, long-term strategy, or brand vision below.</p>
+      <div style="display:flex; gap:16px; justify-content:center; flex-wrap:wrap;">
+        <a href="technical.html" class="btn btn-primary">Technical Stack →</a>
+        <a href="strategy.html" class="btn btn-outline">Strategy &amp; Revenue</a>
+        <a href="brand.html" class="btn btn-outline">Brand &amp; Marketing</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Footer -->
+<footer class="footer">
+  <div class="container">
+    <div class="footer-inner">
+      <span class="footer-logo">☽ Orbi: To the Moon</span>
+      <div class="footer-links">
+        <a href="index.html">Landing</a>
+        <a href="technical.html">Technical</a>
+        <a href="strategy.html">Strategy</a>
+        <a href="brand.html">Brand</a>
+      </div>
+      <span>© 2024 Orbi Devs. Built on Solana.</span>
+    </div>
+  </div>
+</footer>
+
+<script src="script.js"></script>
+</body>
+</html>

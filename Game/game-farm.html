@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Orbi — Moon Farm</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="game.css" />
+</head>
+<body>
+
+<canvas id="stars-canvas"></canvas>
+<div class="toast-container" id="toast-container"></div>
+
+<!-- ── Game HUD ── -->
+<header class="game-hud" id="game-hud">
+  <span class="hud-logo">☽ Orbi</span>
+
+  <div class="hud-section" style="gap:10px;">
+    <div class="level-badge">
+      <span id="hud-level">4</span>
+      <span class="lv-label">LV</span>
+    </div>
+    <div class="xp-wrap">
+      <div class="xp-bar-track">
+        <div class="xp-bar-fill" id="hud-xp-fill" style="width:46%;"></div>
+      </div>
+      <span class="xp-text" id="hud-xp-text">230 / 500 XP</span>
+    </div>
+  </div>
+
+  <div class="hud-section">
+    <span style="font-size:1rem;">⭐</span>
+    <span class="hud-str" id="hud-str">450</span>
+    <span class="hud-label">STR</span>
+  </div>
+
+  <div class="hud-section">
+    <div class="status-bar-wrap">
+      <div class="status-bar-row">
+        <span class="status-icon">⚡</span>
+        <div class="bar-track">
+          <div class="bar-fill energy" id="hud-energy-fill" style="width:70%;"></div>
+        </div>
+        <span class="bar-text" id="hud-energy-text">7/10</span>
+      </div>
+      <div class="status-bar-row">
+        <span class="status-icon">🍖</span>
+        <div class="bar-track">
+          <div class="bar-fill hunger" id="hud-hunger-fill" style="width:80%;"></div>
+        </div>
+        <span class="bar-text" id="hud-hunger-text">4/5</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="hud-spacer"></div>
+  <a href="index.html" class="hud-back-btn">← Pitch Site</a>
+</header>
+
+<!-- ── Game Nav Tabs ── -->
+<div class="game-nav-tabs">
+  <a href="game-hub.html"      class="game-nav-tab">🏠 Hub</a>
+  <a href="game-moondrop.html" class="game-nav-tab">🌕 Moondrop</a>
+  <a href="game-farm.html"     class="game-nav-tab active">🌾 Farm</a>
+  <a href="#"                  class="game-nav-tab" onclick="showToast('📦','Chests coming soon!'); return false;">📦 Chests</a>
+  <a href="#"                  class="game-nav-tab" onclick="showToast('💱','Marketplace coming soon!'); return false;">💱 Market</a>
+  <a href="#"                  class="game-nav-tab" onclick="showToast('🔒','Staking coming soon!'); return false;">🔒 Stake</a>
+</div>
+
+<!-- ── Main Content ── -->
+<div class="game-page">
+  <div class="game-content">
+
+    <!-- Page Title -->
+    <div style="margin-bottom:24px;" class="fade-in">
+      <span class="section-label">Moon Farm</span>
+      <h2 class="section-title" style="margin-bottom:6px;">Your Lunar Farm 🌾</h2>
+      <p style="color:var(--text-secondary); font-size:0.9rem;">
+        Grow wheat → feed your cow → produce milk → craft cheese.
+        Cheese replenishes your <strong style="color:var(--accent-gold);">🍖 hunger bar</strong> so you can keep playing minigames.
+      </p>
+    </div>
+
+    <div class="farm-layout">
+
+      <!-- Left: Farm Plots + Cow -->
+      <div class="fade-in">
+
+        <!-- Farm Plots -->
+        <div class="farm-section-title">🌱 Wheat Plots</div>
+        <div class="farm-plots-grid" id="plots-grid">
+          <!-- Rendered by JS -->
+        </div>
+
+        <!-- Farm Actions -->
+        <div style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom:24px;">
+          <button class="farm-btn primary" onclick="farmAction('plantAll')">🌱 Plant All Empty</button>
+          <button class="farm-btn green"   onclick="farmAction('harvestAll')">🌾 Harvest All Ready</button>
+          <button class="farm-btn"         onclick="farmAction('waterAll')">💧 Water Growing</button>
+        </div>
+
+        <!-- Pipeline display -->
+        <div class="farm-section-title">⚙️ Production Pipeline</div>
+        <div class="pipeline">
+          <div class="pipeline-step">
+            <span class="pipeline-emoji">🌱</span>
+            <span class="pipeline-label">Seeds</span>
+          </div>
+          <span class="pipeline-arrow">→</span>
+          <div class="pipeline-step">
+            <span class="pipeline-emoji">🌾</span>
+            <span class="pipeline-label">Wheat</span>
+          </div>
+          <span class="pipeline-arrow">→</span>
+          <div class="pipeline-step active" id="pipe-feed">
+            <span class="pipeline-emoji">🐄</span>
+            <span class="pipeline-label">Feed Cow</span>
+          </div>
+          <span class="pipeline-arrow">→</span>
+          <div class="pipeline-step">
+            <span class="pipeline-emoji">🥛</span>
+            <span class="pipeline-label">Milk</span>
+          </div>
+          <span class="pipeline-arrow">→</span>
+          <div class="pipeline-step">
+            <span class="pipeline-emoji">🧀</span>
+            <span class="pipeline-label">Cheese</span>
+          </div>
+          <span class="pipeline-arrow">→</span>
+          <div class="pipeline-step">
+            <span class="pipeline-emoji">🍖</span>
+            <span class="pipeline-label">+Hunger</span>
+          </div>
+        </div>
+
+        <!-- Cow Pen -->
+        <div class="cow-pen" style="margin-top:24px;">
+          <div class="farm-section-title">🐄 Cow Pen</div>
+
+          <div class="cow-display">
+            <div class="cow-emoji" id="cow-emoji">🐄</div>
+            <div class="cow-info">
+              <div class="cow-name">Bessie <span style="font-size:0.75rem; color:var(--text-muted);">(Non-transferable)</span></div>
+              <div class="cow-status" id="cow-status-text">Idle — waiting to be fed</div>
+              <div class="cow-stat-pills">
+                <span class="cow-pill rarity-common">Common</span>
+                <span class="cow-pill" style="border-color:rgba(59,130,246,0.4); color:var(--accent-blue-lt); background:rgba(59,130,246,0.08);">Milk/12min</span>
+                <span class="cow-pill" style="border-color:rgba(251,191,36,0.4); color:var(--accent-gold); background:rgba(251,191,36,0.08);">1 Wheat/Feed</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Cow progress bar -->
+          <div id="cow-progress-wrap" style="display:none; margin-bottom:14px;">
+            <div class="full-bar-header" style="margin-bottom:6px;">
+              <span class="full-bar-label" id="cow-progress-label">🥛 Producing Milk…</span>
+              <span class="full-bar-val" id="cow-timer-text">0:00</span>
+            </div>
+            <div class="full-bar-track">
+              <div class="full-bar-fill" id="cow-progress-fill"
+                style="width:0%; background:linear-gradient(90deg,#60a5fa,#a78bfa);"></div>
+            </div>
+          </div>
+
+          <div class="farm-actions">
+            <button class="farm-btn amber" id="feed-cow-btn"  onclick="farmAction('feedCow')">🌾 Feed Cow (1 wheat)</button>
+            <button class="farm-btn"       id="milk-cow-btn"  onclick="farmAction('collectMilk')" disabled>🥛 Collect Milk</button>
+            <button class="farm-btn green" id="make-cheese-btn" onclick="farmAction('makeCheese')" disabled>🧀 Make Cheese (2 milk)</button>
+          </div>
+        </div>
+
+        <!-- Farm Log -->
+        <div class="farm-section-title" style="margin-top:24px;">📋 Farm Log</div>
+        <div class="farm-log" id="farm-log">
+          <div class="farm-log-entry">
+            <span class="log-time">09:41</span>
+            <span class="log-icon">🌱</span>
+            <span>Farm initialised. Ready to plant your first seeds!</span>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Right: Inventory -->
+      <div class="fade-in" style="transition-delay:0.1s;">
+
+        <div class="inventory-panel">
+          <div class="farm-section-title">🎒 Inventory</div>
+          <div class="inventory-grid" id="inventory-grid">
+            <!-- Rendered by JS -->
+          </div>
+        </div>
+
+        <!-- Use Cheese button -->
+        <div style="margin-top:16px;">
+          <button class="farm-btn w-full" id="use-cheese-btn"
+            style="width:100%; justify-content:center;"
+            onclick="farmAction('useCheese')" disabled>
+            🧀 Use Cheese (+1 Hunger)
+          </button>
+        </div>
+
+        <!-- Info card -->
+        <div class="tip-card" style="margin-top:20px;">
+          <div class="tip-card-title">💡 Farm Tips</div>
+          <ul class="tip-list">
+            <li><span>🌱</span><span>Seeds cost 0 STR but require a <strong style="color:#fff;">Seed Chest</strong> to unlock extra plots.</span></li>
+            <li><span>⏱️</span><span>Plots move through stages every <strong style="color:#fff;">10–20 seconds</strong> in this demo (minutes in production).</span></li>
+            <li><span>🐄</span><span>Higher rarity cows produce milk faster and yield more cheese per cycle.</span></li>
+            <li><span>🧀</span><span>Each cheese restores <strong style="color:#fff;">+1 Hunger</strong>, letting you play one more minigame.</span></li>
+            <li><span>📦</span><span>Open chests to unlock better seeds, cows and accessories that boost farm speed.</span></li>
+          </ul>
+        </div>
+
+        <!-- Token earn estimate -->
+        <div class="stat-card" style="margin-top:16px;">
+          <div class="stat-card-title">📊 Today's Estimate</div>
+          <div style="display:flex; flex-direction:column; gap:8px; font-size:0.82rem; margin-top:4px;">
+            <div style="display:flex; justify-content:space-between;">
+              <span style="color:var(--text-muted);">Minigame Earnings</span>
+              <span style="color:var(--accent-gold); font-weight:700;">~120 STR</span>
+            </div>
+            <div style="display:flex; justify-content:space-between;">
+              <span style="color:var(--text-muted);">Hunger Restored</span>
+              <span style="color:#22c55e; font-weight:700;" id="cheese-count-display">1 cheese ready</span>
+            </div>
+            <div style="display:flex; justify-content:space-between;">
+              <span style="color:var(--text-muted);">XP from Farming</span>
+              <span style="color:var(--accent-purple-lt); font-weight:700;">+45 XP</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script src="script.js"></script>
+<script src="game-farm.js"></script>
+</body>
+</html>
