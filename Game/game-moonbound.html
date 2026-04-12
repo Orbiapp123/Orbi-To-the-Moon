@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Orbi — Moonbound</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet" />
+  <style>
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body {
+      background:#04041a;
+      display:flex; flex-direction:column; align-items:center;
+      justify-content:flex-start; min-height:100vh;
+      font-family:'Inter',sans-serif;
+      overflow:hidden; user-select:none; -webkit-user-select:none; touch-action:none;
+    }
+    #top-bar {
+      width:400px; max-width:100vw;
+      display:flex; justify-content:space-between; align-items:center;
+      padding:10px 14px; color:white;
+    }
+    .back-btn { color:rgba(255,255,255,0.55); text-decoration:none; font-size:0.8rem; font-weight:600; }
+    .back-btn:hover { color:#fff; }
+    #title-label {
+      font-size:1rem; font-weight:900;
+      background:linear-gradient(135deg,#a855f7,#3b82f6);
+      -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;
+    }
+    #score-label { font-size:0.95rem; font-weight:700; color:#fde047; }
+    #game-canvas { display:block; cursor:pointer; }
+  </style>
+</head>
+<body>
+
+<div id="top-bar">
+  <a href="game-hub.html" class="back-btn">← Hub</a>
+  <span id="title-label">🌙 Moonbound</span>
+  <span id="score-label">⭐ <span id="score-el">0</span></span>
+</div>
+
+<canvas id="game-canvas"></canvas>
+
+<script>
+const canvas = document.getElementById('game-canvas');
+const ctx    = canvas.getContext('2d');
+
+const W = 400, H = 510;
+canvas.width = W; canvas.height = H;
+const sc = Math.min(1, window.innerWidth / W);
+canvas.style.width  = (W * sc) + 'px';
+canvas.style.height = (H * sc) + 'px';
+
+// ─── CONSTANTS ──────────────────────────────────────────────
+const GRAVITY    = 0.38;
+const FLAP_V     = -8.4;
+const PIPE_W     = 64;
+const BASE_GAP   = 162;
+const BASE_SPD   = 2.5;
+const FLOOR_H    = 24;
+const MOON_R     = 20;
+const MOON_X     = 88;
+
+// ─── BACKGROUND (computed once) ─────────────────────────────
+const STARS = Array.from({length:85}, () => ({
+  x: Math.random()*W, y: Math.random()*H,
+  r: Math.random()*1.6+0.3, a: Math.random()*0.6+0.2
+}));
+
+// ─── STATE ──────────────────────────────────────────────────
+let state    = 'idle';   // idle | playing | dead
+let score    = 0;
+let best     = +( localStorage.getItem('moonbound_best') || 0 );
+let moon, pipes, particles, pTimer, pInterval, pSpeed, gapH;
+let deadTimer = 0, flashAlpha = 0, idleT = 0;
+
+// ─── INIT ────────────────────────────────────────────────────
+function initGame() {
+  moon       = { y: H/2-20, vy:0, rot:0, trail:[] };
+  pipes      = [];
+  particles  = [];
+  pTimer     = 60;
+  pInterval  = 108;
+  pSpeed     = BASE_SPD;
+  gapH       = BASE_GAP;
+  score      = 0;
+  deadTimer  = 0;
+  flashAlpha = 0;
+  document.getElementById('score-el').textContent = '0';
+}
+
+// ─── INPUT ───────────────────────────────────────────────────
+function handleInput() {
+  if (state === 'idle')                          { state='playing'; flap(); return; }
+  if (state === 'playing')                       { flap(); return; }
+  if (state === 'dead' && deadTimer > 55)        { state='idle'; initGame(); }
+}
+canvas.addEventListener('click',    handleInput);
+canvas.addEventListener('touchend', e=>{ e.preventDefault(); handleInput(); }, {passive:false});
+document.addEventListener('keydown', e=>{ if(e.code==='Space'){e.preventDefault();handleInput();} });
+
+// ─── FLAP ────────────────────────────────────────────────────
+function flap() {
+  moon.vy = FLAP_V;
+  for (let i=0;i<6;i++) {
+    const a = Math.PI + (Math.random()-0.5)*1.2;
+    const s = 2+Math.random()*4;
+    particles.push({
+      x:MOON_X-MOON_R, y:moon.y,
+      vx:Math.cos(a)*s, vy:Math.sin(a)*s,
+      r:4+Math.random()*5,
+      col: Math.random()>.5 ? '#a855f7' : '#fbbf24',
+      life:1, decay:.05+Math.random()*.04
+    });
+  }
+}
+
+// ─── SPAWN PIPE ──────────────────────────────────────────────
+function spawnPipe() {
+  const minT = 55, maxT = H-FLOOR_H-gapH-55;
+  const gapTop = minT + Math.random()*(maxT-minT);
+  pipes.push({ x:W+PIPE_W, gt:gapTop, gb:gapTop+gapH, scored:false });
+}
+
+// ─── CIRCLE–RECT COLLISION ───────────────────────────────────
+function circleRect(cx,cy,cr,rx,ry,rw,rh) {
+  const nx=Math.max(rx,Math.min(cx,rx+rw));
+  const ny=Math.max(ry,Math.min(cy,ry+rh));
+  const dx=cx-nx, dy=cy-ny;
+  return dx*dx+dy*dy < cr*cr;
+}
+
+// ─── UPDATE ──────────────────────────────────────────────────
+function update() {
+  if (state !== 'playing') return;
+
+  moon.vy = Math.max(-12, Math.min(moon.vy+GRAVITY, 14));
+  moon.y += moon.vy;
+  moon.rot += (Math.atan2(moon.vy,7) - moon.rot) * 0.13;
+
+  moon.trail.push({x:MOON_X, y:moon.y});
+  if (moon.trail.length > 9) moon.trail.shift();
+
+  // particles
+  particles = particles.filter(p=>p.life>0);
+  particles.forEach(p=>{ p.x+=p.vx; p.y+=p.vy; p.vy+=0.12; p.life-=p.decay; p.r*=0.94; });
+
+  // floor / ceiling
+  if (moon.y+MOON_R > H-FLOOR_H || moon.y-MOON_R < 6) { die(); return; }
+
+  // pipes
+  pTimer--;
+  if (pTimer<=0) { spawnPipe(); pTimer=pInterval; }
+
+  for (let i=pipes.length-1; i>=0; i--) {
+    const p=pipes[i];
+    p.x -= pSpeed;
+
+    if (!p.scored && p.x+PIPE_W/2 < MOON_X) {
+      p.scored = true;
+      score++;
+      document.getElementById('score-el').textContent = score;
+      if (score%8===0)  pSpeed  = Math.min(5.8, pSpeed+0.22);
+      if (score%12===0) gapH    = Math.max(110, gapH-6);
+    }
+
+    if (circleRect(MOON_X,moon.y,MOON_R-2, p.x,0,PIPE_W,p.gt))          { die(); return; }
+    if (circleRect(MOON_X,moon.y,MOON_R-2, p.x,p.gb,PIPE_W,H-FLOOR_H-p.gb)) { die(); return; }
+
+    if (p.x+PIPE_W < 0) pipes.splice(i,1);
+  }
+}
+
+function die() {
+  state='dead'; deadTimer=0; flashAlpha=1;
+  if (score>best) { best=score; localStorage.setItem('moonbound_best',best); }
+}
+
+// ─── DRAW BACKGROUND ─────────────────────────────────────────
+function drawBg() {
+  const bg=ctx.createLinearGradient(0,0,0,H);
+  bg.addColorStop(0,'#0e0630'); bg.addColorStop(.5,'#1a0a50'); bg.addColorStop(1,'#0a061e');
+  ctx.fillStyle=bg; ctx.fillRect(0,0,W,H);
+
+  // Nebula glows
+  [
+    [W*.62,H*.28,135,'rgba(124,58,237,0.2)'],
+    [W*.18,H*.68,105,'rgba(59,130,246,0.16)'],
+    [W*.85,H*.75,80,'rgba(236,72,153,0.12)'],
+  ].forEach(([x,y,r,c])=>{
+    const ng=ctx.createRadialGradient(x,y,0,x,y,r);
+    ng.addColorStop(0,c); ng.addColorStop(1,'transparent');
+    ctx.fillStyle=ng; ctx.beginPath(); ctx.arc(x,y,r,0,Math.PI*2); ctx.fill();
+  });
+
+  // Stars
+  STARS.forEach(s=>{
+    ctx.fillStyle=`rgba(255,255,255,${s.a})`;
+    ctx.beginPath(); ctx.arc(s.x,s.y,s.r,0,Math.PI*2); ctx.fill();
+  });
+
+  drawGalaxy(W*.17, H*.7, 65);
+  drawSaturn(W*.82, H*.22, 38);
+}
+
+function drawGalaxy(x,y,r) {
+  ctx.save();
+  const g=ctx.createRadialGradient(x,y,0,x,y,r);
+  g.addColorStop(0,'rgba(139,92,246,0.38)');
+  g.addColorStop(.45,'rgba(79,70,229,0.22)');
+  g.addColorStop(1,'transparent');
+  ctx.fillStyle=g; ctx.beginPath(); ctx.arc(x,y,r,0,Math.PI*2); ctx.fill();
+  for (let arm=0;arm<2;arm++) {
+    ctx.strokeStyle=arm===0?'rgba(167,139,250,0.45)':'rgba(99,102,241,0.38)';
+    ctx.lineWidth=2.5; ctx.beginPath();
+    for (let t=0.05;t<Math.PI*2.6;t+=0.07) {
+      const sr=t/(Math.PI*2.6)*r*.9;
+      const sx=x+Math.cos(t+arm*Math.PI)*sr;
+      const sy=y+Math.sin(t+arm*Math.PI)*sr*.52;
+      t<0.12 ? ctx.moveTo(sx,sy) : ctx.lineTo(sx,sy);
+    }
+    ctx.stroke();
+  }
+  ctx.restore();
+}
+
+function drawSaturn(x,y,r) {
+  ctx.save();
+  // Back ring arc
+  ctx.globalAlpha=.5; ctx.strokeStyle='#fbbf24'; ctx.lineWidth=r*.28;
+  ctx.beginPath(); ctx.ellipse(x,y,r*1.8,r*.43,-0.22,Math.PI*.05,Math.PI*.95); ctx.stroke();
+  // Body
+  ctx.globalAlpha=1;
+  const g=ctx.createRadialGradient(x-r*.3,y-r*.3,r*.05,x,y,r);
+  g.addColorStop(0,'#fef3c7'); g.addColorStop(.55,'#fcd34d'); g.addColorStop(1,'#92400e');
+  ctx.fillStyle=g; ctx.beginPath(); ctx.arc(x,y,r,0,Math.PI*2); ctx.fill();
+  // Stripes
+  ctx.save(); ctx.beginPath(); ctx.arc(x,y,r,0,Math.PI*2); ctx.clip();
+  ctx.fillStyle='rgba(0,0,0,0.12)';
+  [-r*.34,r*.08,r*.38].forEach(oy=>ctx.fillRect(x-r,y+oy-r*.09,r*2,r*.16));
+  ctx.restore();
+  // Front ring arc
+  ctx.globalAlpha=.5; ctx.strokeStyle='#f59e0b'; ctx.lineWidth=r*.2;
+  ctx.beginPath(); ctx.ellipse(x,y,r*1.8,r*.43,-0.22,Math.PI*1.05,Math.PI*1.95); ctx.stroke();
+  ctx.globalAlpha=1; ctx.restore();
+}
+
+// ─── DRAW PIPES ──────────────────────────────────────────────
+function drawPipes() {
+  pipes.forEach(p=>{
+    drawPillar(p.x, 0,     PIPE_W, p.gt,        'top');
+    drawPillar(p.x, p.gb,  PIPE_W, H-FLOOR_H-p.gb, 'bot');
+  });
+}
+
+function drawPillar(x,y,w,h,side) {
+  if (h<=0) return;
+  // Body gradient
+  const g=ctx.createLinearGradient(x,0,x+w,0);
+  g.addColorStop(0,'#374151'); g.addColorStop(.28,'#6b7280');
+  g.addColorStop(.72,'#4b5563'); g.addColorStop(1,'#1f2937');
+  ctx.fillStyle=g; ctx.fillRect(x,y,w,h);
+
+  // Craters
+  const cdata=side==='top'
+    ?[[x+w*.28,y+h*.22],[x+w*.65,y+h*.55],[x+w*.38,y+h*.78]]
+    :[[x+w*.32,y+h*.18],[x+w*.68,y+h*.48],[x+w*.22,y+h*.72]];
+  cdata.forEach(([cx,cy])=>{
+    ctx.fillStyle='rgba(0,0,0,0.25)';
+    ctx.beginPath(); ctx.ellipse(cx,cy,w*.13,w*.1,0.3,0,Math.PI*2); ctx.fill();
+    ctx.strokeStyle='rgba(255,255,255,0.06)'; ctx.lineWidth=1;
+    ctx.beginPath(); ctx.ellipse(cx,cy,w*.13,w*.1,0.3,0,Math.PI*2); ctx.stroke();
+  });
+
+  // Edge highlight
+  ctx.strokeStyle='rgba(255,255,255,0.07)'; ctx.lineWidth=1.5;
+  ctx.beginPath(); ctx.moveTo(x+1,y); ctx.lineTo(x+1,y+h); ctx.stroke();
+
+  // Cap (protruding end)
+  const capY = side==='top' ? y+h-12 : y-2;
+  const capH = 16;
+  const cg=ctx.createLinearGradient(x-5,0,x+w+5,0);
+  cg.addColorStop(0,'#1f2937'); cg.addColorStop(.35,'#9ca3af');
+  cg.addColorStop(.65,'#6b7280'); cg.addColorStop(1,'#1f2937');
+  ctx.fillStyle=cg; ctx.fillRect(x-5,capY,w+10,capH);
+  ctx.strokeStyle='rgba(255,255,255,0.14)'; ctx.lineWidth=1.5;
+  ctx.strokeRect(x-5,capY,w+10,capH);
+}
+
+// ─── DRAW FLOOR ──────────────────────────────────────────────
+function drawFloor() {
+  const fg=ctx.createLinearGradient(0,H-FLOOR_H,0,H);
+  fg.addColorStop(0,'#1e1b4b'); fg.addColorStop(1,'#0f0c2a');
+  ctx.fillStyle=fg; ctx.fillRect(0,H-FLOOR_H,W,FLOOR_H);
+  ctx.strokeStyle='rgba(167,139,250,0.45)'; ctx.lineWidth=1.5;
+  ctx.beginPath(); ctx.moveTo(0,H-FLOOR_H); ctx.lineTo(W,H-FLOOR_H); ctx.stroke();
+  ctx.fillStyle='rgba(255,255,255,0.22)';
+  [38,95,158,220,282,344].forEach(sx=>{
+    ctx.beginPath(); ctx.arc(sx,H-FLOOR_H/2,1.4,0,Math.PI*2); ctx.fill();
+  });
+}
+
+// ─── DRAW MOON ───────────────────────────────────────────────
+function drawTrail() {
+  moon.trail.forEach((pt,i)=>{
+    const a=(i/moon.trail.length)*0.28;
+    const r=MOON_R*(i/moon.trail.length)*0.65;
+    ctx.fillStyle=`rgba(139,92,246,${a})`;
+    ctx.beginPath(); ctx.arc(pt.x,pt.y,r,0,Math.PI*2); ctx.fill();
+  });
+}
+
+function drawMoon(x,y,rot,vy) {
+  ctx.save();
+  ctx.translate(x,y); ctx.rotate(rot);
+
+  // Soft glow
+  const gl=ctx.createRadialGradient(0,0,MOON_R*.3,0,0,MOON_R*2);
+  gl.addColorStop(0,'rgba(255,255,255,0.18)'); gl.addColorStop(1,'transparent');
+  ctx.fillStyle=gl; ctx.beginPath(); ctx.arc(0,0,MOON_R*2,0,Math.PI*2); ctx.fill();
+
+  // Body
+  const mg=ctx.createRadialGradient(-MOON_R*.32,-MOON_R*.32,MOON_R*.04,0,0,MOON_R);
+  mg.addColorStop(0,'#f1f1ea'); mg.addColorStop(.5,'#d1d5db'); mg.addColorStop(1,'#9ca3af');
+  ctx.fillStyle=mg; ctx.beginPath(); ctx.arc(0,0,MOON_R,0,Math.PI*2); ctx.fill();
+  ctx.strokeStyle='rgba(255,255,255,0.28)'; ctx.lineWidth=1.5; ctx.stroke();
+
+  // Craters (clipped)
+  ctx.save(); ctx.beginPath(); ctx.arc(0,0,MOON_R,0,Math.PI*2); ctx.clip();
+  ctx.fillStyle='rgba(0,0,0,0.17)';
+  [[-7,-6,5],[6,4,4],[-3,7,3]].forEach(([cx,cy,cr])=>{
+    ctx.beginPath(); ctx.arc(cx,cy,cr,0,Math.PI*2); ctx.fill();
+  });
+  ctx.restore();
+
+  // Eyes
+  const er=2.9;
+  ctx.fillStyle='#374151';
+  ctx.beginPath(); ctx.arc(-5.5,-2,er,0,Math.PI*2); ctx.fill();
+  ctx.beginPath(); ctx.arc( 5.5,-2,er,0,Math.PI*2); ctx.fill();
+  ctx.fillStyle='rgba(255,255,255,0.88)';
+  ctx.beginPath(); ctx.arc(-4.2,-3.2,1.2,0,Math.PI*2); ctx.fill();
+  ctx.beginPath(); ctx.arc( 6.8,-3.2,1.2,0,Math.PI*2); ctx.fill();
+
+  // Mouth — reacts to velocity
+  ctx.strokeStyle='#374151'; ctx.lineWidth=1.9; ctx.lineCap='round';
+  if (vy < -3) {
+    // Rising — excited open mouth
+    ctx.beginPath(); ctx.arc(0,5.5,4.5,0.05*Math.PI,0.95*Math.PI); ctx.stroke();
+    // Teeth
+    ctx.fillStyle='rgba(255,255,255,0.9)';
+    ctx.fillRect(-3.5,5.5,3,2.5); ctx.fillRect(0.5,5.5,3,2.5);
+  } else if (vy > 5) {
+    // Falling fast — worried (inverted smile)
+    ctx.beginPath(); ctx.arc(0,10,4.5,-0.88*Math.PI,-0.12*Math.PI); ctx.stroke();
+  } else {
+    // Neutral smile
+    ctx.beginPath(); ctx.arc(0,4.5,3.8,0.1*Math.PI,0.9*Math.PI); ctx.stroke();
+  }
+
+  // Blush
+  ctx.fillStyle='rgba(239,68,68,0.26)';
+  ctx.beginPath(); ctx.ellipse(-8.5,3,3.5,2,0,0,Math.PI*2); ctx.fill();
+  ctx.beginPath(); ctx.ellipse( 8.5,3,3.5,2,0,0,Math.PI*2); ctx.fill();
+
+  ctx.restore();
+}
+
+// ─── PARTICLES ───────────────────────────────────────────────
+function drawParticles() {
+  particles.forEach(p=>{
+    ctx.save(); ctx.globalAlpha=p.life;
+    ctx.fillStyle=p.col;
+    ctx.beginPath(); ctx.arc(p.x,p.y,p.r,0,Math.PI*2); ctx.fill();
+    ctx.restore();
+  });
+}
+
+// ─── HUD (score number on canvas) ────────────────────────────
+function drawScore() {
+  if (state==='idle') return;
+  ctx.font='900 40px Inter'; ctx.textAlign='center';
+  ctx.strokeStyle='rgba(0,0,0,0.55)'; ctx.lineWidth=4;
+  ctx.strokeText(score,W/2,56);
+  ctx.fillStyle='#ffffff'; ctx.fillText(score,W/2,56);
+  ctx.textAlign='left';
+}
+
+// ─── HELPER ──────────────────────────────────────────────────
+function rr(x,y,w,h,r) {
+  ctx.beginPath();
+  ctx.moveTo(x+r,y); ctx.lineTo(x+w-r,y); ctx.quadraticCurveTo(x+w,y,x+w,y+r);
+  ctx.lineTo(x+w,y+h-r); ctx.quadraticCurveTo(x+w,y+h,x+w-r,y+h);
+  ctx.lineTo(x+r,y+h); ctx.quadraticCurveTo(x,y+h,x,y+h-r);
+  ctx.lineTo(x,y+r); ctx.quadraticCurveTo(x,y,x+r,y);
+  ctx.closePath();
+}
+
+// ─── IDLE SCREEN ─────────────────────────────────────────────
+function drawIdle() {
+  idleT += 0.055;
+  const by = Math.sin(idleT)*13;
+  const br = Math.sin(idleT*0.7)*0.14;
+  drawMoon(MOON_X, H/2-18+by, br, 0);
+
+  // Panel
+  ctx.fillStyle='rgba(8,4,32,0.78)';
+  rr(W/2-145,H/2+8,290,148,18); ctx.fill();
+  ctx.strokeStyle='rgba(139,92,246,0.55)'; ctx.lineWidth=2; ctx.stroke();
+
+  ctx.textAlign='center';
+  ctx.font='900 30px Inter';
+  const tg=ctx.createLinearGradient(W/2-90,0,W/2+90,0);
+  tg.addColorStop(0,'#a855f7'); tg.addColorStop(1,'#fbbf24');
+  ctx.fillStyle=tg; ctx.fillText('MOONBOUND',W/2,H/2+50);
+
+  ctx.font='600 13px Inter'; ctx.fillStyle='rgba(255,255,255,0.58)';
+  ctx.fillText('Tap  ·  Click  ·  Space  to fly',W/2,H/2+76);
+
+  if (best>0) {
+    ctx.font='700 13px Inter'; ctx.fillStyle='#fde047';
+    ctx.fillText('🏆 Best: '+best,W/2,H/2+100);
+  }
+
+  const pulse=0.45+Math.sin(idleT*2)*0.35;
+  ctx.font='700 11px Inter'; ctx.fillStyle=`rgba(167,139,250,${pulse})`;
+  ctx.fillText('Earn $STR on the daily leaderboard',W/2,H/2+128);
+  ctx.textAlign='left';
+}
+
+// ─── DEAD SCREEN ─────────────────────────────────────────────
+function drawDead() {
+  deadTimer++;
+
+  // White flash first
+  if (flashAlpha>0) {
+    ctx.fillStyle=`rgba(255,255,255,${flashAlpha})`;
+    ctx.fillRect(0,0,W,H);
+    flashAlpha=Math.max(0,flashAlpha-0.065);
+    return;
+  }
+  if (deadTimer<55) return;
+
+  ctx.fillStyle='rgba(4,2,20,0.85)';
+  rr(W/2-148,H/2-88,296,218,20); ctx.fill();
+  ctx.strokeStyle='rgba(239,68,68,0.5)'; ctx.lineWidth=2; ctx.stroke();
+
+  ctx.textAlign='center';
+  ctx.font='900 28px Inter'; ctx.fillStyle='#f87171';
+  ctx.fillText('CRASHED!',W/2,H/2-44);
+
+  ctx.font='700 12px Inter'; ctx.fillStyle='rgba(255,255,255,0.42)';
+  ctx.fillText('Score',W/2,H/2-14);
+
+  ctx.font='900 52px Inter';
+  const tg=ctx.createLinearGradient(W/2-70,0,W/2+70,0);
+  tg.addColorStop(0,'#a855f7'); tg.addColorStop(1,'#fbbf24');
+  ctx.fillStyle=tg; ctx.fillText(score,W/2,H/2+44);
+
+  if (score>=best) {
+    ctx.font='700 13px Inter'; ctx.fillStyle='#fde047';
+    ctx.fillText('🏆 New Best!',W/2,H/2+68);
+  } else {
+    ctx.font='700 12px Inter'; ctx.fillStyle='rgba(255,255,255,0.38)';
+    ctx.fillText('Best: '+best,W/2,H/2+68);
+  }
+
+  const p2=0.55+Math.sin(deadTimer*.1)*0.42;
+  ctx.font='700 13px Inter'; ctx.fillStyle=`rgba(255,255,255,${p2})`;
+  ctx.fillText('Tap to try again',W/2,H/2+105);
+  ctx.textAlign='left';
+}
+
+// ─── MAIN LOOP ───────────────────────────────────────────────
+function loop() {
+  update();
+  drawBg();
+
+  if (state==='idle') {
+    drawFloor();
+    drawIdle();
+  } else {
+    drawParticles();
+    drawPipes();
+    drawTrail();
+    drawMoon(MOON_X, moon.y, moon.rot, moon.vy);
+    drawFloor();
+    drawScore();
+    if (state==='dead') drawDead();
+  }
+
+  requestAnimationFrame(loop);
+}
+
+// ─── START ───────────────────────────────────────────────────
+initGame();
+loop();
+</script>
+</body>
+</html>
