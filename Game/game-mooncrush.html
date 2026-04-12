@@ -1,0 +1,713 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Orbi — MoonCrush</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/matter-js/0.19.0/matter.min.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet" />
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      background: #04041a;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      min-height: 100vh;
+      font-family: 'Inter', sans-serif;
+      overflow: hidden;
+      user-select: none;
+      -webkit-user-select: none;
+      touch-action: none;
+    }
+
+    #top-bar {
+      width: 400px;
+      max-width: 100vw;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 14px;
+      color: white;
+    }
+
+    .back-btn {
+      color: rgba(255,255,255,0.55);
+      text-decoration: none;
+      font-size: 0.8rem;
+      font-weight: 600;
+    }
+    .back-btn:hover { color: #fff; }
+
+    #title-label {
+      font-size: 1rem;
+      font-weight: 900;
+      background: linear-gradient(135deg, #a855f7, #fbbf24);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    #score-label {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: #fde047;
+    }
+
+    #game-canvas {
+      display: block;
+      cursor: crosshair;
+    }
+
+    /* Guide strip below canvas */
+    #guide-strip {
+      width: 400px;
+      max-width: 100vw;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 2px;
+      padding: 6px 8px;
+      background: rgba(255,255,255,0.03);
+      border-top: 1px solid rgba(255,255,255,0.07);
+    }
+
+    .guide-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 2px;
+      flex: 1;
+    }
+
+    .guide-dot {
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    .guide-name {
+      font-size: 0.55rem;
+      color: rgba(255,255,255,0.4);
+      text-align: center;
+      white-space: nowrap;
+    }
+
+    /* Game over overlay */
+    #overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(4,4,26,0.88);
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 18px;
+      z-index: 100;
+    }
+    #overlay.show { display: flex; }
+    #overlay h2 {
+      font-size: 2.2rem;
+      font-weight: 900;
+      background: linear-gradient(135deg, #a855f7, #f59e0b);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    #overlay .ov-score {
+      font-size: 1.3rem;
+      font-weight: 700;
+      color: #fde047;
+    }
+    #overlay .ov-sub { font-size: 0.9rem; color: rgba(255,255,255,0.45); }
+
+    .btn-restart {
+      background: linear-gradient(135deg, #7c3aed, #a855f7);
+      color: #fff;
+      border: none;
+      padding: 13px 36px;
+      border-radius: 100px;
+      font-size: 1rem;
+      font-weight: 700;
+      cursor: pointer;
+      font-family: 'Inter', sans-serif;
+      margin-top: 8px;
+    }
+    .btn-restart:hover { opacity: 0.9; }
+
+    .btn-hub {
+      color: rgba(255,255,255,0.4);
+      text-decoration: none;
+      font-size: 0.85rem;
+    }
+    .btn-hub:hover { color: #fff; }
+  </style>
+</head>
+<body>
+
+<div id="top-bar">
+  <a href="game-hub.html" class="back-btn">← Hub</a>
+  <span id="title-label">🌕 MoonCrush</span>
+  <span id="score-label">⭐ <span id="score-val">0</span></span>
+</div>
+
+<canvas id="game-canvas"></canvas>
+
+<div id="guide-strip"></div>
+
+<div id="overlay">
+  <div style="font-size:3rem;">🌕</div>
+  <h2>Game Over!</h2>
+  <div class="ov-score">Score: <span id="final-score">0</span></div>
+  <div class="ov-sub">Merge planets to score higher</div>
+  <button class="btn-restart" onclick="restartGame()">Play Again</button>
+  <a href="game-hub.html" class="btn-hub">← Back to Hub</a>
+</div>
+
+<script>
+// ════════════════════════════════════════════
+//  PLANET DEFINITIONS
+// ════════════════════════════════════════════
+const PLANETS = [
+  { name: 'Pebble',   r: 14,  fill: '#fca5a5', dark: '#e96060',  type: 'rocky'   },
+  { name: 'Comet',    r: 20,  fill: '#bfdbfe', dark: '#60a5fa',  type: 'plain'   },
+  { name: 'Star',     r: 27,  fill: '#fde047', dark: '#f59e0b',  type: 'star'    },
+  { name: 'Rock',     r: 34,  fill: '#c084fc', dark: '#9333ea',  type: 'rocky'   },
+  { name: 'Moon',     r: 42,  fill: '#fdba74', dark: '#f97316',  type: 'craters' },
+  { name: 'Mercury',  r: 51,  fill: '#f87171', dark: '#dc2626',  type: 'plain'   },
+  { name: 'Titan',    r: 61,  fill: '#fcd34d', dark: '#b45309',  type: 'stripes' },
+  { name: 'Neptune',  r: 73,  fill: '#818cf8', dark: '#4338ca',  type: 'stripes' },
+  { name: 'Mars',     r: 87,  fill: '#fb923c', dark: '#c2410c',  type: 'craters' },
+  { name: 'Jupiter',  r: 104, fill: '#d97706', dark: '#78350f',  type: 'stripes' },
+  { name: 'The Sun',  r: 122, fill: '#fde047', dark: '#f59e0b',  type: 'sun'     },
+];
+const SCORES = [1, 3, 6, 10, 15, 21, 28, 36, 55, 78, 150];
+
+// ════════════════════════════════════════════
+//  CANVAS + DIMENSIONS
+// ════════════════════════════════════════════
+const canvas = document.getElementById('game-canvas');
+const ctx    = canvas.getContext('2d');
+
+const W       = 400;
+const H       = 500;
+canvas.width  = W;
+canvas.height = H;
+canvas.style.width  = Math.min(W, window.innerWidth) + 'px';
+canvas.style.height = (Math.min(W, window.innerWidth) / W * H) + 'px';
+
+const WALL  = 18;          // wall thickness
+const GL    = WALL;        // game left x
+const GR    = W - WALL;    // game right x
+const FLOOR = H - WALL;    // ground y
+const DLINE = 72;          // danger / drop line y
+const DROP_Y = 52;         // centre of drop planet
+
+// ════════════════════════════════════════════
+//  MATTER.JS
+// ════════════════════════════════════════════
+const { Engine, World, Bodies, Body, Events } = Matter;
+
+let engine, world, mRunner;
+let activeBodies  = [];    // planet Body objects
+let bodyTierMap   = new Map(); // body.id → tier
+let pendingMerges = [];
+let particles     = [];
+
+// ════════════════════════════════════════════
+//  GAME STATE
+// ════════════════════════════════════════════
+let score       = 0;
+let isGameOver  = false;
+let curTier     = 0;
+let nxtTier     = 0;
+let dropX       = W / 2;
+let canDrop     = true;
+let cooldown    = 0;
+let overTimer   = 0;
+
+// ════════════════════════════════════════════
+//  STARS (bg)
+// ════════════════════════════════════════════
+const BG_STARS = Array.from({ length: 70 }, () => ({
+  x: Math.random() * W,
+  y: Math.random() * H,
+  r: Math.random() * 1.4 + 0.3,
+  a: Math.random() * 0.55 + 0.2,
+}));
+
+// ════════════════════════════════════════════
+//  INIT
+// ════════════════════════════════════════════
+function initGame() {
+  score      = 0;
+  isGameOver = false;
+  canDrop    = true;
+  cooldown   = 0;
+  overTimer  = 0;
+  dropX      = W / 2;
+  activeBodies  = [];
+  bodyTierMap   = new Map();
+  pendingMerges = [];
+  particles     = [];
+
+  document.getElementById('score-val').textContent    = '0';
+  document.getElementById('overlay').classList.remove('show');
+
+  engine = Engine.create({ gravity: { x: 0, y: 2 } });
+  world  = engine.world;
+
+  // Static walls
+  const ground = Bodies.rectangle(W/2,     FLOOR + WALL/2, W,      WALL, { isStatic: true, label: 'wall', friction: 0.8 });
+  const wallL  = Bodies.rectangle(WALL/2,  H/2,            WALL,   H,    { isStatic: true, label: 'wall', friction: 0.5 });
+  const wallR  = Bodies.rectangle(W-WALL/2,H/2,            WALL,   H,    { isStatic: true, label: 'wall', friction: 0.5 });
+  World.add(world, [ground, wallL, wallR]);
+
+  Events.on(engine, 'collisionStart', onCollision);
+
+  curTier = rndTier();
+  nxtTier = rndTier();
+
+  buildGuide();
+}
+
+function rndTier() {
+  return Math.floor(Math.random() * 5);
+}
+
+// ════════════════════════════════════════════
+//  COLLISION / MERGE
+// ════════════════════════════════════════════
+function onCollision(evt) {
+  evt.pairs.forEach(({ bodyA, bodyB }) => {
+    if (bodyA.label === 'wall' || bodyB.label === 'wall') return;
+    const ta = bodyTierMap.get(bodyA.id);
+    const tb = bodyTierMap.get(bodyB.id);
+    if (ta === undefined || tb === undefined) return;
+    if (ta !== tb) return;
+    if (bodyA.merging || bodyB.merging) return;
+    if (ta >= PLANETS.length - 1) return;
+    bodyA.merging = true;
+    bodyB.merging = true;
+    pendingMerges.push({ bodyA, bodyB, tier: ta });
+  });
+}
+
+function processMerges() {
+  pendingMerges.forEach(({ bodyA, bodyB, tier }) => {
+    const mx = (bodyA.position.x + bodyB.position.x) / 2;
+    const my = (bodyA.position.y + bodyB.position.y) / 2;
+    World.remove(world, bodyA);
+    World.remove(world, bodyB);
+    activeBodies = activeBodies.filter(b => b.id !== bodyA.id && b.id !== bodyB.id);
+    bodyTierMap.delete(bodyA.id);
+    bodyTierMap.delete(bodyB.id);
+
+    const newTier = tier + 1;
+    const nb = spawnPlanet(mx, Math.min(my, FLOOR - PLANETS[newTier].r - 2), newTier);
+    Body.setVelocity(nb, { x: 0, y: -2 });
+
+    score += SCORES[newTier];
+    document.getElementById('score-val').textContent = score;
+
+    burst(mx, my, PLANETS[newTier].fill, 12);
+  });
+  pendingMerges = [];
+}
+
+function spawnPlanet(x, y, tier) {
+  const r  = PLANETS[tier].r;
+  const cx = Math.max(GL + r + 1, Math.min(GR - r - 1, x));
+  const b  = Bodies.circle(cx, y, r, {
+    restitution: 0.15,
+    friction:    0.6,
+    density:     0.0025,
+    label:       'planet',
+  });
+  b.planetTier = tier;
+  bodyTierMap.set(b.id, tier);
+  activeBodies.push(b);
+  World.add(world, b);
+  return b;
+}
+
+// ════════════════════════════════════════════
+//  DROP
+// ════════════════════════════════════════════
+function drop() {
+  if (!canDrop || isGameOver) return;
+  const r  = PLANETS[curTier].r;
+  const cx = Math.max(GL + r + 2, Math.min(GR - r - 2, dropX));
+  spawnPlanet(cx, DROP_Y, curTier);
+  curTier  = nxtTier;
+  nxtTier  = rndTier();
+  canDrop  = false;
+  cooldown = 55;
+}
+
+// ════════════════════════════════════════════
+//  PARTICLES
+// ════════════════════════════════════════════
+function burst(x, y, color, n) {
+  for (let i = 0; i < n; i++) {
+    const a = (Math.PI * 2 * i) / n + Math.random() * 0.4;
+    const s = 2 + Math.random() * 5;
+    particles.push({ x, y, vx: Math.cos(a)*s, vy: Math.sin(a)*s,
+      r: 5 + Math.random()*5, color, life: 1, decay: 0.04+Math.random()*0.03 });
+  }
+}
+function tickParticles() {
+  particles = particles.filter(p => p.life > 0);
+  particles.forEach(p => {
+    p.x += p.vx; p.y += p.vy;
+    p.vy += 0.2;
+    p.life -= p.decay;
+    p.r  *= 0.96;
+  });
+}
+function drawParticles() {
+  particles.forEach(p => {
+    ctx.save();
+    ctx.globalAlpha = p.life;
+    ctx.fillStyle   = p.color;
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, p.r, 0, Math.PI*2);
+    ctx.fill();
+    ctx.restore();
+  });
+}
+
+// ════════════════════════════════════════════
+//  PLANET DRAWING
+// ════════════════════════════════════════════
+function drawPlanet(x, y, tier, alpha = 1) {
+  if (tier < 0 || tier >= PLANETS.length) return;
+  const p = PLANETS[tier];
+  const r = p.r;
+  ctx.save();
+  ctx.globalAlpha = alpha;
+
+  /* --- SUN glow --- */
+  if (p.type === 'sun') {
+    const g = ctx.createRadialGradient(x, y, r*0.4, x, y, r*2.2);
+    g.addColorStop(0, 'rgba(253,224,71,0.45)');
+    g.addColorStop(1, 'rgba(253,224,71,0)');
+    ctx.fillStyle = g;
+    ctx.beginPath(); ctx.arc(x, y, r*2.2, 0, Math.PI*2); ctx.fill();
+  }
+
+  /* --- STAR shape --- */
+  if (p.type === 'star') {
+    drawStarShape(x, y, r, p.fill, p.dark);
+    drawFace(x, y, r * 0.58);
+    ctx.restore();
+    return;
+  }
+
+  /* --- Main circle with 3-D gradient --- */
+  ctx.beginPath();
+  ctx.arc(x, y, r, 0, Math.PI*2);
+  const gr = ctx.createRadialGradient(x - r*0.35, y - r*0.35, r*0.05, x, y, r);
+  gr.addColorStop(0, lighten(p.fill, 55));
+  gr.addColorStop(0.55, p.fill);
+  gr.addColorStop(1,   p.dark);
+  ctx.fillStyle = gr;
+  ctx.fill();
+  ctx.strokeStyle = p.dark;
+  ctx.lineWidth   = 1.5;
+  ctx.stroke();
+
+  /* --- Clipped decorations --- */
+  ctx.save();
+  ctx.beginPath(); ctx.arc(x, y, r - 1.5, 0, Math.PI*2); ctx.clip();
+
+  if (p.type === 'stripes') {
+    ctx.fillStyle = 'rgba(0,0,0,0.14)';
+    const ns = tier >= 9 ? 5 : 3;
+    for (let i = -ns; i <= ns; i++) {
+      ctx.fillRect(x - r, y + i * r * 0.34 - r * 0.11, r * 2, r * 0.2);
+    }
+  }
+  if (p.type === 'craters' || p.type === 'rocky') {
+    const pts = [ [-r*.35,-r*.25],[r*.28,-r*.12],[-r*.12,r*.32],[r*.22,r*.28] ];
+    const nc  = p.type === 'rocky' ? 2 : 4;
+    ctx.fillStyle = 'rgba(0,0,0,0.17)';
+    for (let i = 0; i < nc; i++) {
+      ctx.beginPath();
+      ctx.arc(x + pts[i][0], y + pts[i][1], r * 0.15, 0, Math.PI*2);
+      ctx.fill();
+      ctx.strokeStyle = 'rgba(0,0,0,0.10)';
+      ctx.lineWidth   = 1;
+      ctx.stroke();
+    }
+  }
+  ctx.restore(); /* end clip */
+
+  drawFace(x, y, r);
+  ctx.restore();
+}
+
+function drawStarShape(x, y, r, fill, stroke) {
+  const pts = 4, inner = r * 0.42;
+  ctx.beginPath();
+  for (let i = 0; i < pts * 2; i++) {
+    const rad = i % 2 === 0 ? r : inner;
+    const ang = (i * Math.PI) / pts - Math.PI / 2;
+    i === 0
+      ? ctx.moveTo(x + rad*Math.cos(ang), y + rad*Math.sin(ang))
+      : ctx.lineTo(x + rad*Math.cos(ang), y + rad*Math.sin(ang));
+  }
+  ctx.closePath();
+  const g = ctx.createRadialGradient(x-r*.2, y-r*.2, r*.05, x, y, r);
+  g.addColorStop(0, '#fffde7'); g.addColorStop(1, fill);
+  ctx.fillStyle   = g;
+  ctx.fill();
+  ctx.strokeStyle = stroke;
+  ctx.lineWidth   = 2;
+  ctx.stroke();
+}
+
+function drawFace(x, y, r) {
+  if (r < 13) return;
+  const er  = Math.max(2, r * 0.1);
+  const eox = r * 0.26;
+  const eoy = -r * 0.08;
+
+  /* eyes */
+  ctx.fillStyle = '#1c1917';
+  ctx.beginPath(); ctx.arc(x - eox, y + eoy, er,      0, Math.PI*2); ctx.fill();
+  ctx.beginPath(); ctx.arc(x + eox, y + eoy, er,      0, Math.PI*2); ctx.fill();
+  /* shine */
+  ctx.fillStyle = 'rgba(255,255,255,0.9)';
+  ctx.beginPath(); ctx.arc(x - eox + er*.5, y + eoy - er*.45, er*.38, 0, Math.PI*2); ctx.fill();
+  ctx.beginPath(); ctx.arc(x + eox + er*.5, y + eoy - er*.45, er*.38, 0, Math.PI*2); ctx.fill();
+  /* smile */
+  ctx.strokeStyle = '#1c1917';
+  ctx.lineWidth   = Math.max(1.5, r * 0.065);
+  ctx.lineCap     = 'round';
+  ctx.beginPath();
+  ctx.arc(x, y + r * 0.18, r * 0.26, 0.12*Math.PI, 0.88*Math.PI);
+  ctx.stroke();
+  /* blush */
+  ctx.fillStyle = 'rgba(239,68,68,0.28)';
+  ctx.beginPath(); ctx.ellipse(x - eox - er*.3, y + r*.22, er*1.3, er*.72, 0, 0, Math.PI*2); ctx.fill();
+  ctx.beginPath(); ctx.ellipse(x + eox + er*.3, y + r*.22, er*1.3, er*.72, 0, 0, Math.PI*2); ctx.fill();
+}
+
+function lighten(hex, amt) {
+  const r = Math.min(255, parseInt(hex.slice(1,3),16) + amt);
+  const g = Math.min(255, parseInt(hex.slice(3,5),16) + amt);
+  const b = Math.min(255, parseInt(hex.slice(5,7),16) + amt);
+  return `rgb(${r},${g},${b})`;
+}
+
+// ════════════════════════════════════════════
+//  BACKGROUND + WALLS
+// ════════════════════════════════════════════
+function drawBackground() {
+  /* deep space */
+  const bg = ctx.createLinearGradient(0, 0, 0, H);
+  bg.addColorStop(0, '#060620'); bg.addColorStop(1, '#0e0c2e');
+  ctx.fillStyle = bg;
+  ctx.fillRect(0, 0, W, H);
+  /* stars */
+  BG_STARS.forEach(s => {
+    ctx.fillStyle = `rgba(255,255,255,${s.a})`;
+    ctx.beginPath(); ctx.arc(s.x, s.y, s.r, 0, Math.PI*2); ctx.fill();
+  });
+  /* subtle grid */
+  ctx.strokeStyle = 'rgba(90,80,200,0.07)';
+  ctx.lineWidth   = 1;
+  for (let gx = GL; gx <= GR; gx += 28) { ctx.beginPath(); ctx.moveTo(gx,DLINE); ctx.lineTo(gx,FLOOR); ctx.stroke(); }
+  for (let gy = DLINE; gy <= FLOOR; gy += 28) { ctx.beginPath(); ctx.moveTo(GL,gy); ctx.lineTo(GR,gy); ctx.stroke(); }
+}
+
+function drawWalls() {
+  /* left */
+  const wl = ctx.createLinearGradient(0, 0, GL, 0);
+  wl.addColorStop(0, '#1e0a3c'); wl.addColorStop(1, '#3b1278');
+  ctx.fillStyle = wl; ctx.fillRect(0, 0, GL, H);
+  /* right */
+  const wr = ctx.createLinearGradient(GR, 0, W, 0);
+  wr.addColorStop(0, '#3b1278'); wr.addColorStop(1, '#1e0a3c');
+  ctx.fillStyle = wr; ctx.fillRect(GR, 0, WALL, H);
+  /* floor */
+  const wf = ctx.createLinearGradient(0, FLOOR, 0, H);
+  wf.addColorStop(0, '#3b1278'); wf.addColorStop(1, '#1e0a3c');
+  ctx.fillStyle = wf; ctx.fillRect(0, FLOOR, W, WALL);
+  /* inner edge glow lines */
+  ctx.strokeStyle = 'rgba(168,85,247,0.55)'; ctx.lineWidth = 2;
+  ctx.beginPath(); ctx.moveTo(GL, 0); ctx.lineTo(GL, H); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(GR, 0); ctx.lineTo(GR, H); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(GL, FLOOR); ctx.lineTo(GR, FLOOR); ctx.stroke();
+  /* corner orbs */
+  [[GL,FLOOR],[GR,FLOOR],[GL,0],[GR,0]].forEach(([cx,cy]) => {
+    ctx.strokeStyle = 'rgba(251,191,36,0.7)'; ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.arc(cx, cy, 7, 0, Math.PI*2); ctx.stroke();
+    ctx.fillStyle = '#fbbf24';
+    ctx.beginPath(); ctx.arc(cx, cy, 3.5, 0, Math.PI*2); ctx.fill();
+  });
+}
+
+function drawDangerLine() {
+  ctx.strokeStyle = 'rgba(251,191,36,0.6)'; ctx.lineWidth = 2;
+  ctx.setLineDash([9, 7]);
+  ctx.beginPath(); ctx.moveTo(GL, DLINE); ctx.lineTo(GR, DLINE); ctx.stroke();
+  ctx.setLineDash([]);
+}
+
+function drawDropper() {
+  if (!canDrop || isGameOver) return;
+  const r  = PLANETS[curTier].r;
+  const cx = Math.max(GL + r + 2, Math.min(GR - r - 2, dropX));
+  /* guide line */
+  ctx.strokeStyle = 'rgba(255,255,255,0.1)'; ctx.lineWidth = 1.5;
+  ctx.setLineDash([4,5]);
+  ctx.beginPath(); ctx.moveTo(cx, DROP_Y + r); ctx.lineTo(cx, FLOOR); ctx.stroke();
+  ctx.setLineDash([]);
+  /* planet */
+  drawPlanet(cx, DROP_Y, curTier, 0.82);
+}
+
+function drawNextPanel() {
+  /* small "NEXT" label + planet preview, top-left inside game area */
+  const nx = GL + 28, ny = DLINE - 22;
+  ctx.fillStyle = 'rgba(255,255,255,0.35)';
+  ctx.font      = '700 9px Inter';
+  ctx.textAlign = 'center';
+  ctx.fillText('NEXT', nx, ny);
+
+  /* draw scaled-down next planet */
+  const pr  = PLANETS[nxtTier].r;
+  const tgt = 16;
+  const sc  = tgt / pr;
+  ctx.save();
+  ctx.translate(nx, ny + 4 + tgt);
+  ctx.scale(sc, sc);
+  drawPlanet(0, 0, nxtTier, 0.9);
+  ctx.restore();
+
+  ctx.textAlign = 'left'; // reset
+}
+
+// ════════════════════════════════════════════
+//  GAME-OVER CHECK
+// ════════════════════════════════════════════
+function checkGameOver() {
+  if (isGameOver) return;
+  let anyAbove = false;
+  activeBodies.forEach(b => {
+    const tier = bodyTierMap.get(b.id);
+    if (tier === undefined) return;
+    if (b.position.y - PLANETS[tier].r < DLINE && b.speed < 0.6) anyAbove = true;
+  });
+  if (anyAbove) {
+    overTimer++;
+    if (overTimer > 130) triggerGameOver();
+  } else {
+    overTimer = 0;
+  }
+}
+
+function triggerGameOver() {
+  isGameOver = true;
+  document.getElementById('final-score').textContent = score;
+  document.getElementById('overlay').classList.add('show');
+}
+
+// ════════════════════════════════════════════
+//  GUIDE STRIP (HTML, built once)
+// ════════════════════════════════════════════
+function buildGuide() {
+  const strip = document.getElementById('guide-strip');
+  strip.innerHTML = '';
+  PLANETS.forEach(p => {
+    const wrap = document.createElement('div');
+    wrap.className = 'guide-item';
+    const dot = document.createElement('div');
+    dot.className = 'guide-dot';
+    const sz = Math.min(p.r * 0.55, 16);
+    dot.style.cssText = `width:${sz*2}px;height:${sz*2}px;background:${p.fill};border:1.5px solid ${p.dark};`;
+    const lbl = document.createElement('div');
+    lbl.className   = 'guide-name';
+    lbl.textContent = p.name;
+    wrap.append(dot, lbl);
+    strip.append(wrap);
+  });
+}
+
+// ════════════════════════════════════════════
+//  MAIN LOOP
+// ════════════════════════════════════════════
+let lastTs = 0;
+function loop(ts) {
+  const dt = Math.min(ts - lastTs, 48);
+  lastTs   = ts;
+
+  if (!isGameOver) {
+    Engine.update(engine, dt || 16);
+    processMerges();
+    tickParticles();
+
+    if (!canDrop) { cooldown--; if (cooldown <= 0) canDrop = true; }
+    checkGameOver();
+  }
+
+  /* render */
+  drawBackground();
+  activeBodies.forEach(b => {
+    if (b.isStatic) return;
+    const tier = bodyTierMap.get(b.id);
+    if (tier !== undefined) drawPlanet(b.position.x, b.position.y, tier);
+  });
+  drawParticles();
+  drawDangerLine();
+  drawWalls();
+  drawDropper();
+  drawNextPanel();
+
+  requestAnimationFrame(loop);
+}
+
+// ════════════════════════════════════════════
+//  INPUT
+// ════════════════════════════════════════════
+function canvasX(clientX) {
+  const rect = canvas.getBoundingClientRect();
+  return (clientX - rect.left) * (W / rect.width);
+}
+
+canvas.addEventListener('mousemove', e => { dropX = canvasX(e.clientX); });
+canvas.addEventListener('click',     () => { drop(); });
+
+canvas.addEventListener('touchmove', e => {
+  e.preventDefault();
+  dropX = canvasX(e.touches[0].clientX);
+}, { passive: false });
+
+canvas.addEventListener('touchend', e => {
+  e.preventDefault();
+  drop();
+}, { passive: false });
+
+// ════════════════════════════════════════════
+//  RESTART
+// ════════════════════════════════════════════
+function restartGame() {
+  if (engine) {
+    Events.off(engine, 'collisionStart');
+    World.clear(world, false);
+    Engine.clear(engine);
+  }
+  initGame();
+}
+
+// ════════════════════════════════════════════
+//  START
+// ════════════════════════════════════════════
+initGame();
+requestAnimationFrame(loop);
+</script>
+</body>
+</html>
