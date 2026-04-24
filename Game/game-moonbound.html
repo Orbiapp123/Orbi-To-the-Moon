@@ -4,42 +4,223 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <title>Orbi — Moonbound</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="game.css" />
   <style>
-    * { margin:0; padding:0; box-sizing:border-box; }
-    body {
-      background:#04041a;
-      display:flex; flex-direction:column; align-items:center;
-      justify-content:flex-start; min-height:100vh;
-      font-family:'Inter',sans-serif;
-      overflow:hidden; user-select:none; -webkit-user-select:none; touch-action:none;
+    /* ── Moonbound-specific overrides ── */
+    #game-canvas {
+      display: block;
+      cursor: pointer;
+      touch-action: none;
+      border: 1px solid rgba(168,85,247,0.4);
+      border-radius: 12px;
+      box-shadow: 0 0 40px rgba(124,58,237,0.2), 0 0 80px rgba(124,58,237,0.08);
+      max-width: 100%;
     }
-    #top-bar {
-      width:400px; max-width:100vw;
-      display:flex; justify-content:space-between; align-items:center;
-      padding:10px 14px; color:white;
-    }
-    .back-btn { color:rgba(255,255,255,0.55); text-decoration:none; font-size:0.8rem; font-weight:600; }
-    .back-btn:hover { color:#fff; }
-    #title-label {
-      font-size:1rem; font-weight:900;
-      background:linear-gradient(135deg,#a855f7,#3b82f6);
-      -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;
-    }
-    #score-label { font-size:0.95rem; font-weight:700; color:#fde047; }
-    #game-canvas { display:block; cursor:pointer; }
   </style>
 </head>
 <body>
 
-<div id="top-bar">
-  <a href="game-hub.html" class="back-btn">← Hub</a>
-  <span id="title-label">🌙 Moonbound</span>
-  <span id="score-label">⭐ <span id="score-el">0</span></span>
+<canvas id="stars-canvas"></canvas>
+<div class="toast-container" id="toast-container"></div>
+
+<!-- ── Game HUD ── -->
+<header class="game-hud" id="game-hud">
+  <span class="hud-logo">☽ Orbi</span>
+
+  <div class="hud-section" style="gap:10px;">
+    <div class="level-badge">
+      <span id="hud-level">4</span>
+      <span class="lv-label">LV</span>
+    </div>
+    <div class="xp-wrap">
+      <div class="xp-bar-track">
+        <div class="xp-bar-fill" id="hud-xp-fill" style="width:46%;"></div>
+      </div>
+      <span class="xp-text" id="hud-xp-text">230 / 500 XP</span>
+    </div>
+  </div>
+
+  <div class="hud-section">
+    <span style="font-size:1rem;">⭐</span>
+    <span class="hud-str" id="hud-str">450</span>
+    <span class="hud-label">STR</span>
+  </div>
+
+  <div class="hud-section">
+    <div class="status-bar-wrap">
+      <div class="status-bar-row">
+        <span class="status-icon">⚡</span>
+        <div class="bar-track"><div class="bar-fill energy" id="hud-energy-fill" style="width:70%;"></div></div>
+        <span class="bar-text" id="hud-energy-text">7/10</span>
+      </div>
+      <div class="status-bar-row">
+        <span class="status-icon">🍖</span>
+        <div class="bar-track"><div class="bar-fill hunger" id="hud-hunger-fill" style="width:80%;"></div></div>
+        <span class="bar-text" id="hud-hunger-text">4/5</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="hud-spacer"></div>
+  <a href="../index.html" class="hud-back-btn">← Pitch Site</a>
+</header>
+
+<!-- ── Game Nav Tabs ── -->
+<div class="game-nav-tabs">
+  <a href="game-hub.html"       class="game-nav-tab">🏠 Hub</a>
+  <a href="game-moondrop.html"  class="game-nav-tab">🌕 Moondrop</a>
+  <a href="game-mooncrush.html" class="game-nav-tab">🪐 MoonCrush</a>
+  <a href="game-moonbound.html" class="game-nav-tab active">☽ Moonbound</a>
+  <a href="game-farm.html"      class="game-nav-tab">🌾 Farm</a>
+  <a href="#" class="game-nav-tab" onclick="showToast('🔒','Staking coming soon!'); return false;">🔒 Stake</a>
 </div>
 
-<canvas id="game-canvas"></canvas>
+<!-- ── Main Content ── -->
+<div class="game-page">
+  <div class="game-content">
 
+    <!-- Title -->
+    <div style="margin-bottom:24px;" class="fade-in">
+      <span class="section-label">Minigame</span>
+      <h2 class="section-title" style="margin-bottom:6px;">Moonbound ☽</h2>
+      <p style="color:var(--text-secondary); font-size:0.9rem;">
+        Tap to flap your moon through rocky asteroid pillars in space. Every gap you clear
+        scores a point — how far can you go before you crash?
+        Each play costs <strong style="color:var(--accent-gold);">1 Hunger</strong> — replenish with cheese from the farm!
+      </p>
+    </div>
+
+    <div class="moondrop-layout">
+
+      <!-- Canvas -->
+      <div class="game-canvas-wrap fade-in">
+        <canvas id="game-canvas"></canvas>
+      </div>
+
+      <!-- Stats Sidebar -->
+      <div class="game-stats-panel fade-in" style="transition-delay:0.1s;">
+
+        <!-- Live Score -->
+        <div class="stat-card">
+          <div class="stat-card-title">🎯 Score</div>
+          <div class="current-score" id="score-el">0</div>
+          <div class="high-score">🏆 Best: <span id="best-score-display">0</span></div>
+        </div>
+
+        <!-- STR Rewards -->
+        <div class="stat-card">
+          <div class="stat-card-title">⭐ $STR Rewards</div>
+          <div style="font-size:0.82rem; color:var(--text-secondary); line-height:1.6;">
+            Top-third leaderboard players earn the
+            <strong style="color:var(--accent-gold);">maximum daily $STR</strong> payout.
+            Fly further, score higher, climb the ranks!
+          </div>
+        </div>
+
+        <!-- Hunger -->
+        <div class="stat-card">
+          <div class="stat-card-title">🍖 Hunger</div>
+          <div style="display:flex; flex-direction:column; gap:8px;">
+            <div class="full-bar-wrap">
+              <div class="full-bar-header">
+                <span class="full-bar-label">Remaining</span>
+                <span class="full-bar-val" id="hunger-display">4 / 5</span>
+              </div>
+              <div class="full-bar-track">
+                <div class="full-bar-fill hunger" id="hunger-bar-fill" style="width:80%;"></div>
+              </div>
+            </div>
+            <div style="font-size:0.75rem; color:var(--text-muted);">
+              Each play costs 1 hunger. Go to the
+              <a href="game-farm.html" style="color:var(--accent-purple-lt);">Farm</a> to craft cheese!
+            </div>
+          </div>
+        </div>
+
+        <!-- Controls -->
+        <div class="stat-card">
+          <div class="stat-card-title">🎮 Controls</div>
+          <ul class="controls-list">
+            <li><span class="key-badge">CLICK</span> Flap upward</li>
+            <li><span class="key-badge">SPACE</span> Flap upward</li>
+            <li><span class="key-badge">TAP</span> Tap to flap on mobile</li>
+          </ul>
+        </div>
+
+        <!-- Tips -->
+        <div class="tip-card">
+          <div class="tip-card-title">💡 Moonbound Tips</div>
+          <ul class="tip-list">
+            <li><span>☽</span><span>Short, quick taps give more control than holding down.</span></li>
+            <li><span>📈</span><span>Speed increases every 8 points — stay sharp after 16+!</span></li>
+            <li><span>↕️</span><span>The gap shrinks the further you fly. Precision matters!</span></li>
+            <li><span>😮</span><span>Watch the moon's face — excited going up, worried falling fast.</span></li>
+            <li><span>🏆</span><span>Top-third leaderboard players earn the maximum daily $STR payout.</span></li>
+          </ul>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script src="script.js"></script>
+<script>
+  // ── HUD sync from localStorage ──────────────────────────────
+  function getState() {
+    const d = { level:4, xp:230, xpNeeded:500, str:450, energy:7, maxEnergy:10, hunger:4, maxHunger:5 };
+    try { return Object.assign(d, JSON.parse(localStorage.getItem('orbi_state')||'{}')); }
+    catch(e) { return d; }
+  }
+  function syncHUD() {
+    const s = getState();
+    const ep = Math.round(s.energy/s.maxEnergy*100);
+    const hp = Math.round(s.hunger/s.maxHunger*100);
+    document.getElementById('hud-level').textContent         = s.level;
+    document.getElementById('hud-str').textContent           = s.str.toLocaleString();
+    document.getElementById('hud-xp-fill').style.width       = Math.round(s.xp/s.xpNeeded*100)+'%';
+    document.getElementById('hud-xp-text').textContent       = s.xp+' / '+s.xpNeeded+' XP';
+    document.getElementById('hud-energy-fill').style.width   = ep+'%';
+    document.getElementById('hud-energy-text').textContent   = s.energy+'/'+s.maxEnergy;
+    document.getElementById('hud-hunger-fill').style.width   = hp+'%';
+    document.getElementById('hud-hunger-text').textContent   = s.hunger+'/'+s.maxHunger;
+    document.getElementById('hunger-display').textContent    = s.hunger+' / '+s.maxHunger;
+    document.getElementById('hunger-bar-fill').style.width   = hp+'%';
+  }
+  syncHUD();
+
+  // ── Best score display (game JS tracks internally, we just show it) ──
+  const _mbBest = +(localStorage.getItem('moonbound_best')||0);
+  document.getElementById('best-score-display').textContent = _mbBest;
+
+  // Refresh best display when game updates localStorage
+  window.addEventListener('storage', e => {
+    if (e.key === 'moonbound_best') {
+      document.getElementById('best-score-display').textContent = e.newValue || 0;
+    }
+  });
+
+  // Also watch score-el for new-best updates after each game
+  new MutationObserver(() => {
+    const stored = +(localStorage.getItem('moonbound_best')||0);
+    document.getElementById('best-score-display').textContent = stored;
+  }).observe(document.getElementById('score-el'), { childList: true, subtree: true, characterData: true });
+
+  // ── Toast helper ────────────────────────────────────────────
+  function showToast(icon, msg) {
+    const c = document.getElementById('toast-container');
+    const t = document.createElement('div');
+    t.className = 'toast';
+    t.innerHTML = `<span style="font-size:1.1rem;">${icon}</span> ${msg}`;
+    c.appendChild(t);
+    setTimeout(() => t.remove(), 3200);
+  }
+  window.showToast = showToast;
+</script>
 <script>
 const canvas = document.getElementById('game-canvas');
 const ctx    = canvas.getContext('2d');

@@ -5,166 +5,294 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <title>Orbi — MoonCrush</title>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/matter-js/0.19.0/matter.min.js"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="game.css" />
   <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-
-    body {
-      background: #04041a;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: flex-start;
-      min-height: 100vh;
-      font-family: 'Inter', sans-serif;
-      overflow: hidden;
-      user-select: none;
-      -webkit-user-select: none;
-      touch-action: none;
-    }
-
-    #top-bar {
-      width: 400px;
-      max-width: 100vw;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 10px 14px;
-      color: white;
-    }
-
-    .back-btn {
-      color: rgba(255,255,255,0.55);
-      text-decoration: none;
-      font-size: 0.8rem;
-      font-weight: 600;
-    }
-    .back-btn:hover { color: #fff; }
-
-    #title-label {
-      font-size: 1rem;
-      font-weight: 900;
-      background: linear-gradient(135deg, #a855f7, #fbbf24);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-    }
-
-    #score-label {
-      font-size: 0.95rem;
-      font-weight: 700;
-      color: #fde047;
-    }
-
+    /* ── MoonCrush-specific overrides ── */
     #game-canvas {
       display: block;
       cursor: crosshair;
+      touch-action: none;
+      border: 1px solid rgba(168,85,247,0.4);
+      border-radius: 12px 12px 0 0;
+      box-shadow: 0 0 40px rgba(124,58,237,0.2), 0 0 80px rgba(124,58,237,0.08);
+      max-width: 100%;
     }
 
-    /* Guide strip below canvas */
+    /* Guide strip sits flush under the canvas */
     #guide-strip {
-      width: 400px;
-      max-width: 100vw;
+      width: 100%;
       display: flex;
       align-items: center;
       justify-content: center;
       gap: 2px;
-      padding: 6px 8px;
+      padding: 7px 8px;
       background: rgba(255,255,255,0.03);
-      border-top: 1px solid rgba(255,255,255,0.07);
+      border: 1px solid rgba(168,85,247,0.25);
+      border-top: none;
+      border-radius: 0 0 12px 12px;
     }
-
     .guide-item {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 2px;
-      flex: 1;
+      display: flex; flex-direction: column; align-items: center; gap: 2px; flex: 1;
     }
+    .guide-dot { border-radius: 50%; flex-shrink: 0; }
+    .guide-name { font-size: 0.52rem; color: rgba(255,255,255,0.38); text-align: center; white-space: nowrap; }
 
-    .guide-dot {
-      border-radius: 50%;
-      flex-shrink: 0;
-    }
-
-    .guide-name {
-      font-size: 0.55rem;
-      color: rgba(255,255,255,0.4);
-      text-align: center;
-      white-space: nowrap;
-    }
-
-    /* Game over overlay */
+    /* Game-over overlay — absolute inside .game-canvas-wrap (position:relative) */
     #overlay {
       display: none;
-      position: fixed;
+      position: absolute;
       inset: 0;
-      background: rgba(4,4,26,0.88);
+      background: rgba(4,4,26,0.9);
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      gap: 18px;
+      gap: 16px;
       z-index: 100;
+      border-radius: 12px;
+      text-align: center;
+      padding: 32px;
     }
     #overlay.show { display: flex; }
     #overlay h2 {
-      font-size: 2.2rem;
-      font-weight: 900;
+      font-size: 2.2rem; font-weight: 900;
       background: linear-gradient(135deg, #a855f7, #f59e0b);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
     }
-    #overlay .ov-score {
-      font-size: 1.3rem;
-      font-weight: 700;
-      color: #fde047;
-    }
-    #overlay .ov-sub { font-size: 0.9rem; color: rgba(255,255,255,0.45); }
-
+    #overlay .ov-score { font-size: 1.3rem; font-weight: 700; color: #fde047; }
+    #overlay .ov-best  { font-size: 0.85rem; color: rgba(255,255,255,0.45); }
+    #overlay .ov-sub   { font-size: 0.9rem; color: rgba(255,255,255,0.45); }
     .btn-restart {
       background: linear-gradient(135deg, #7c3aed, #a855f7);
-      color: #fff;
-      border: none;
-      padding: 13px 36px;
-      border-radius: 100px;
-      font-size: 1rem;
-      font-weight: 700;
-      cursor: pointer;
-      font-family: 'Inter', sans-serif;
-      margin-top: 8px;
+      color: #fff; border: none; padding: 13px 36px; border-radius: 100px;
+      font-size: 1rem; font-weight: 700; cursor: pointer; font-family: 'Inter', sans-serif; margin-top: 4px;
     }
-    .btn-restart:hover { opacity: 0.9; }
-
-    .btn-hub {
-      color: rgba(255,255,255,0.4);
-      text-decoration: none;
-      font-size: 0.85rem;
-    }
+    .btn-restart:hover { opacity: 0.88; }
+    .btn-hub { color: rgba(255,255,255,0.4); text-decoration: none; font-size: 0.85rem; }
     .btn-hub:hover { color: #fff; }
   </style>
 </head>
 <body>
 
-<div id="top-bar">
-  <a href="game-hub.html" class="back-btn">← Hub</a>
-  <span id="title-label">🌕 MoonCrush</span>
-  <span id="score-label">⭐ <span id="score-val">0</span></span>
+<canvas id="stars-canvas"></canvas>
+<div class="toast-container" id="toast-container"></div>
+
+<!-- ── Game HUD ── -->
+<header class="game-hud" id="game-hud">
+  <span class="hud-logo">☽ Orbi</span>
+
+  <div class="hud-section" style="gap:10px;">
+    <div class="level-badge">
+      <span id="hud-level">4</span>
+      <span class="lv-label">LV</span>
+    </div>
+    <div class="xp-wrap">
+      <div class="xp-bar-track">
+        <div class="xp-bar-fill" id="hud-xp-fill" style="width:46%;"></div>
+      </div>
+      <span class="xp-text" id="hud-xp-text">230 / 500 XP</span>
+    </div>
+  </div>
+
+  <div class="hud-section">
+    <span style="font-size:1rem;">⭐</span>
+    <span class="hud-str" id="hud-str">450</span>
+    <span class="hud-label">STR</span>
+  </div>
+
+  <div class="hud-section">
+    <div class="status-bar-wrap">
+      <div class="status-bar-row">
+        <span class="status-icon">⚡</span>
+        <div class="bar-track"><div class="bar-fill energy" id="hud-energy-fill" style="width:70%;"></div></div>
+        <span class="bar-text" id="hud-energy-text">7/10</span>
+      </div>
+      <div class="status-bar-row">
+        <span class="status-icon">🍖</span>
+        <div class="bar-track"><div class="bar-fill hunger" id="hud-hunger-fill" style="width:80%;"></div></div>
+        <span class="bar-text" id="hud-hunger-text">4/5</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="hud-spacer"></div>
+  <a href="../index.html" class="hud-back-btn">← Pitch Site</a>
+</header>
+
+<!-- ── Game Nav Tabs ── -->
+<div class="game-nav-tabs">
+  <a href="game-hub.html"       class="game-nav-tab">🏠 Hub</a>
+  <a href="game-moondrop.html"  class="game-nav-tab">🌕 Moondrop</a>
+  <a href="game-mooncrush.html" class="game-nav-tab active">🪐 MoonCrush</a>
+  <a href="game-moonbound.html" class="game-nav-tab">☽ Moonbound</a>
+  <a href="game-farm.html"      class="game-nav-tab">🌾 Farm</a>
+  <a href="#" class="game-nav-tab" onclick="showToast('🔒','Staking coming soon!'); return false;">🔒 Stake</a>
 </div>
 
-<canvas id="game-canvas"></canvas>
+<!-- ── Main Content ── -->
+<div class="game-page">
+  <div class="game-content">
 
-<div id="guide-strip"></div>
+    <!-- Title -->
+    <div style="margin-bottom:24px;" class="fade-in">
+      <span class="section-label">Minigame</span>
+      <h2 class="section-title" style="margin-bottom:6px;">MoonCrush 🪐</h2>
+      <p style="color:var(--text-secondary); font-size:0.9rem;">
+        Drop planets and merge matching ones into bigger ones. Stack your way up to
+        <strong style="color:var(--accent-gold);">The Sun</strong> for the ultimate score.
+        Each play costs <strong style="color:var(--accent-gold);">1 Hunger</strong> — replenish with cheese from the farm!
+      </p>
+    </div>
 
-<div id="overlay">
-  <div style="font-size:3rem;">🌕</div>
-  <h2>Game Over!</h2>
-  <div class="ov-score">Score: <span id="final-score">0</span></div>
-  <div class="ov-sub">Merge planets to score higher</div>
-  <button class="btn-restart" onclick="restartGame()">Play Again</button>
-  <a href="game-hub.html" class="btn-hub">← Back to Hub</a>
+    <div class="moondrop-layout">
+
+      <!-- Canvas + guide strip -->
+      <div class="game-canvas-wrap fade-in">
+        <canvas id="game-canvas"></canvas>
+        <div id="guide-strip"></div>
+
+        <!-- Game-Over Overlay -->
+        <div id="overlay">
+          <div style="font-size:3rem;">🌕</div>
+          <h2>Game Over!</h2>
+          <div class="ov-score">Score: <span id="final-score">0</span></div>
+          <div class="ov-best" id="overlay-best"></div>
+          <div class="ov-sub">Merge planets to score higher</div>
+          <button class="btn-restart" onclick="restartGame()">▶ Play Again</button>
+          <a href="game-hub.html" class="btn-hub">← Back to Hub</a>
+        </div>
+      </div>
+
+      <!-- Stats Sidebar -->
+      <div class="game-stats-panel fade-in" style="transition-delay:0.1s;">
+
+        <!-- Live Score -->
+        <div class="stat-card">
+          <div class="stat-card-title">🎯 Score</div>
+          <div class="current-score" id="score-val">0</div>
+          <div class="high-score">🏆 Best: <span id="best-score-display">0</span></div>
+        </div>
+
+        <!-- STR Rewards -->
+        <div class="stat-card">
+          <div class="stat-card-title">⭐ $STR Rewards</div>
+          <div style="font-size:0.82rem; color:var(--text-secondary); line-height:1.6;">
+            Top-third leaderboard players earn the
+            <strong style="color:var(--accent-gold);">maximum daily $STR</strong> payout.
+            Bigger merges = higher score = better rank!
+          </div>
+        </div>
+
+        <!-- Hunger -->
+        <div class="stat-card">
+          <div class="stat-card-title">🍖 Hunger</div>
+          <div style="display:flex; flex-direction:column; gap:8px;">
+            <div class="full-bar-wrap">
+              <div class="full-bar-header">
+                <span class="full-bar-label">Remaining</span>
+                <span class="full-bar-val" id="hunger-display">4 / 5</span>
+              </div>
+              <div class="full-bar-track">
+                <div class="full-bar-fill hunger" id="hunger-bar-fill" style="width:80%;"></div>
+              </div>
+            </div>
+            <div style="font-size:0.75rem; color:var(--text-muted);">
+              Each play costs 1 hunger. Go to the
+              <a href="game-farm.html" style="color:var(--accent-purple-lt);">Farm</a> to craft cheese!
+            </div>
+          </div>
+        </div>
+
+        <!-- Controls -->
+        <div class="stat-card">
+          <div class="stat-card-title">🎮 Controls</div>
+          <ul class="controls-list">
+            <li><span class="key-badge">MOVE</span> Move mouse / drag to aim</li>
+            <li><span class="key-badge">CLICK</span> Drop the planet</li>
+            <li><span class="key-badge">TAP</span> Tap to drop on mobile</li>
+          </ul>
+        </div>
+
+        <!-- Tips -->
+        <div class="tip-card">
+          <div class="tip-card-title">💡 MoonCrush Tips</div>
+          <ul class="tip-list">
+            <li><span>🪐</span><span>Match two identical planets to merge them into the next tier!</span></li>
+            <li><span>⚠️</span><span>If a planet stays above the danger line too long, it's game over.</span></li>
+            <li><span>📐</span><span>Use the side walls to your advantage — planets bounce off them.</span></li>
+            <li><span>☀️</span><span>Merging to The Sun scores 150 points — the biggest combo possible!</span></li>
+            <li><span>🏆</span><span>Top-third leaderboard players earn the maximum daily $STR payout.</span></li>
+          </ul>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
 </div>
 
+<script src="script.js"></script>
+<script>
+  // ── HUD sync from localStorage ──────────────────────────────
+  function getState() {
+    const d = { level:4, xp:230, xpNeeded:500, str:450, energy:7, maxEnergy:10, hunger:4, maxHunger:5 };
+    try { return Object.assign(d, JSON.parse(localStorage.getItem('orbi_state')||'{}')); }
+    catch(e) { return d; }
+  }
+  function syncHUD() {
+    const s = getState();
+    const ep = Math.round(s.energy/s.maxEnergy*100);
+    const hp = Math.round(s.hunger/s.maxHunger*100);
+    document.getElementById('hud-level').textContent         = s.level;
+    document.getElementById('hud-str').textContent           = s.str.toLocaleString();
+    document.getElementById('hud-xp-fill').style.width       = Math.round(s.xp/s.xpNeeded*100)+'%';
+    document.getElementById('hud-xp-text').textContent       = s.xp+' / '+s.xpNeeded+' XP';
+    document.getElementById('hud-energy-fill').style.width   = ep+'%';
+    document.getElementById('hud-energy-text').textContent   = s.energy+'/'+s.maxEnergy;
+    document.getElementById('hud-hunger-fill').style.width   = hp+'%';
+    document.getElementById('hud-hunger-text').textContent   = s.hunger+'/'+s.maxHunger;
+    document.getElementById('hunger-display').textContent    = s.hunger+' / '+s.maxHunger;
+    document.getElementById('hunger-bar-fill').style.width   = hp+'%';
+  }
+  syncHUD();
+
+  // ── Best score tracking ──────────────────────────────────────
+  let _mcBest = +(localStorage.getItem('mooncrush_best')||0);
+  document.getElementById('best-score-display').textContent = _mcBest;
+
+  // Watch score-val for changes and update best
+  new MutationObserver(() => {
+    const v = +(document.getElementById('score-val').textContent||0);
+    if (v > _mcBest) {
+      _mcBest = v;
+      localStorage.setItem('mooncrush_best', _mcBest);
+      document.getElementById('best-score-display').textContent = _mcBest;
+    }
+  }).observe(document.getElementById('score-val'), { childList: true, subtree: true, characterData: true });
+
+  // Populate overlay best label when game over triggers
+  const _origTrigger = window.triggerGameOver;
+  document.getElementById('overlay').addEventListener('transitionend', () => {});
+  // Patch: after overlay shows, fill best label
+  const _ovObs = new MutationObserver(() => {
+    const el = document.getElementById('overlay-best');
+    if (el) el.textContent = _mcBest > 0 ? '🏆 Best: '+_mcBest : '';
+  });
+  _ovObs.observe(document.getElementById('overlay'), { attributes: true, attributeFilter: ['class'] });
+
+  // ── Toast helper ────────────────────────────────────────────
+  function showToast(icon, msg) {
+    const c = document.getElementById('toast-container');
+    const t = document.createElement('div');
+    t.className = 'toast';
+    t.innerHTML = `<span style="font-size:1.1rem;">${icon}</span> ${msg}`;
+    c.appendChild(t);
+    setTimeout(() => t.remove(), 3200);
+  }
+  window.showToast = showToast;
+</script>
 <script>
 // ════════════════════════════════════════════
 //  PLANET DEFINITIONS
