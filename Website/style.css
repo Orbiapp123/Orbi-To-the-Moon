@@ -136,6 +136,21 @@ section { padding: 96px 0; }
 
 .nav-cta:hover { opacity: 0.85; }
 
+.nav-cta-ghost {
+  border: 1px solid rgba(168, 85, 247, 0.55) !important;
+  color: var(--accent-purple-lt) !important;
+  padding: 9px 20px !important;
+  border-radius: 8px !important;
+  font-weight: 600 !important;
+  transition: background 0.2s, border-color 0.2s !important;
+  -webkit-text-fill-color: var(--accent-purple-lt) !important;
+}
+
+.nav-cta-ghost:hover {
+  background: rgba(124, 58, 237, 0.15) !important;
+  border-color: rgba(168, 85, 247, 0.9) !important;
+}
+
 /* ── Page Header (non-home pages) ── */
 .page-header {
   padding: 140px 0 80px;
