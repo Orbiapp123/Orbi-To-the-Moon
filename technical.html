@@ -256,42 +256,163 @@
   </div>
 </section>
 
-<!-- Frontend -->
+<!-- Game Mechanics -->
 <section style="background: rgba(255,255,255,0.015); border-top:1px solid var(--border); border-bottom:1px solid var(--border);">
+  <div class="container">
+    <div class="text-center fade-in">
+      <span class="section-label">Game Mechanics</span>
+      <h2 class="section-title">How the game actually works</h2>
+      <p class="section-subtitle">Six interlocking systems that create a self-sustaining play loop — every mechanic feeds the next, and every action has an on-chain consequence.</p>
+    </div>
+
+    <div class="grid-2 fade-in" style="margin-top:48px;">
+      <div class="card" style="border-color:rgba(168,85,247,0.4); background:linear-gradient(135deg,rgba(124,58,237,0.06),rgba(124,58,237,0.02));">
+        <span class="card-icon">🌙</span>
+        <h3>The Moon Character</h3>
+        <p style="color:var(--text-secondary); font-size:0.9rem; line-height:1.7;">
+          Every player owns exactly one Moon character NFT — soul-bound to their wallet. It cannot be transferred, bought, or duplicated. The Moon levels up as you play, unlocking new farming plots, higher leaderboard tiers, and exclusive chest access. Accessories collected from chests or the marketplace are equipped to your Moon, giving it a look that reflects your rarity. One wallet. One Moon. Organic progression only.
+        </p>
+        <div style="margin-top:16px; display:flex; gap:8px; flex-wrap:wrap;">
+          <span class="tag">Soul-bound NFT</span>
+          <span class="tag">XP system</span>
+          <span class="tag">Cosmetic accessories</span>
+        </div>
+      </div>
+
+      <div class="card" style="border-color:rgba(34,197,94,0.4); background:linear-gradient(135deg,rgba(34,197,94,0.05),rgba(34,197,94,0.01));">
+        <span class="card-icon">🌾</span>
+        <h3>Farming</h3>
+        <p style="color:var(--text-secondary); font-size:0.9rem; line-height:1.7;">
+          The farming loop is: <strong style="color:#fff;">plant seeds → grow wheat → feed cows → collect milk → make cheese</strong>. Each step is a timed action validated by the backend — you can't harvest before the timer expires, and you can't skip steps. Cows have rarity tiers that affect milk yield. Farm produce can be sold peer-to-peer on the marketplace for SOL, creating a genuine off-chain value loop. Seed Chests unlock additional farm plots, giving long-term players a compounding farming advantage.
+        </p>
+        <div style="margin-top:16px; display:flex; gap:8px; flex-wrap:wrap;">
+          <span class="tag" style="border-color:rgba(34,197,94,0.3);color:#4ade80;">Timed actions</span>
+          <span class="tag" style="border-color:rgba(34,197,94,0.3);color:#4ade80;">Sell for SOL</span>
+          <span class="tag" style="border-color:rgba(34,197,94,0.3);color:#4ade80;">Cow rarity tiers</span>
+        </div>
+      </div>
+
+      <div class="card" style="border-color:rgba(59,130,246,0.4); background:linear-gradient(135deg,rgba(59,130,246,0.05),rgba(59,130,246,0.01));">
+        <span class="card-icon">🎮</span>
+        <h3>Minigames</h3>
+        <p style="color:var(--text-secondary); font-size:0.9rem; line-height:1.7;">
+          Minigames are skill-based arcade games embedded in the app. Each play costs energy and scores points on the daily leaderboard. The leaderboard resets at midnight UTC — every day is a fresh race. Top-ranked players share a <strong style="color:#fff;">fixed daily $STR reward pool</strong>, paid from the treasury. This pool is not minted fresh — it is drawn from the 40% staking treasury allocation, meaning every reward is backed by real supply. More minigames roll out via community vote in Phase 4.
+        </p>
+        <div style="margin-top:16px; display:flex; gap:8px; flex-wrap:wrap;">
+          <span class="tag" style="border-color:rgba(59,130,246,0.3);color:#60a5fa;">Daily leaderboard</span>
+          <span class="tag" style="border-color:rgba(59,130,246,0.3);color:#60a5fa;">Fixed STR budget</span>
+          <span class="tag" style="border-color:rgba(59,130,246,0.3);color:#60a5fa;">Skill-based</span>
+        </div>
+      </div>
+
+      <div class="card" style="border-color:rgba(251,191,36,0.4); background:linear-gradient(135deg,rgba(251,191,36,0.05),rgba(251,191,36,0.01));">
+        <span class="card-icon">⚡</span>
+        <h3>Energy &amp; Hunger System</h3>
+        <p style="color:var(--text-secondary); font-size:0.9rem; line-height:1.7;">
+          Every game action — farming a plot, playing a minigame — costs <strong style="color:#fff;">energy</strong>. Energy restores passively over real time. Your Moon also has a <strong style="color:#fff;">hunger bar</strong> that depletes slowly; a hungry Moon earns less STR per action. Both bars are hard-capped and enforced at the API level and on-chain via timestamp checks. This is the core anti-bot mechanism: no wallet can drain the treasury through automation. A bot plays at the same rate as a human — the cap removes the advantage entirely.
+        </p>
+        <div style="margin-top:16px; display:flex; gap:8px; flex-wrap:wrap;">
+          <span class="tag" style="border-color:rgba(251,191,36,0.3);color:#fbbf24;">Bot-resistant</span>
+          <span class="tag" style="border-color:rgba(251,191,36,0.3);color:#fbbf24;">On-chain enforced</span>
+          <span class="tag" style="border-color:rgba(251,191,36,0.3);color:#fbbf24;">Passive restore</span>
+        </div>
+      </div>
+
+      <div class="card" style="border-color:rgba(236,72,153,0.4); background:linear-gradient(135deg,rgba(236,72,153,0.05),rgba(236,72,153,0.01));">
+        <span class="card-icon">🏆</span>
+        <h3>Leaderboard &amp; $STR Rewards</h3>
+        <p style="color:var(--text-secondary); font-size:0.9rem; line-height:1.7;">
+          The daily leaderboard ranks players by their combined farming output and minigame score. Top players at midnight UTC receive $STR rewards — split proportionally across the top tier. To prevent exploitation, referred players must reach a minimum level before their referrer earns a bonus, eliminating fake-account farming. Leaderboard rewards are intentionally modest at launch — enough to be compelling, not enough to inflate the supply dangerously. Developer-adjustable per epoch to stabilise price.
+        </p>
+        <div style="margin-top:16px; display:flex; gap:8px; flex-wrap:wrap;">
+          <span class="tag" style="border-color:rgba(236,72,153,0.3);color:#f472b6;">Daily reset</span>
+          <span class="tag" style="border-color:rgba(236,72,153,0.3);color:#f472b6;">Anti-exploit gating</span>
+          <span class="tag" style="border-color:rgba(236,72,153,0.3);color:#f472b6;">Epoch-adjustable</span>
+        </div>
+      </div>
+
+      <div class="card" style="border-color:rgba(20,184,166,0.4); background:linear-gradient(135deg,rgba(20,184,166,0.05),rgba(20,184,166,0.01));">
+        <span class="card-icon">🛒</span>
+        <h3>Marketplace</h3>
+        <p style="color:var(--text-secondary); font-size:0.9rem; line-height:1.7;">
+          Players list items — accessories, cows, seeds — for peer-to-peer sale in SOL. When a sale completes, <strong style="color:#fff;">99% goes to the seller and 1% to the developer wallet</strong>. This is enforced by the smart contract: the item is held in a PDA escrow and only released when payment clears. Rarity drives price discovery naturally — Cosmic accessories command multiples of Common ones. The marketplace creates a genuine economy inside the game: items have real SOL value, and players with rare chests have a real financial edge.
+        </p>
+        <div style="margin-top:16px; display:flex; gap:8px; flex-wrap:wrap;">
+          <span class="tag" style="border-color:rgba(20,184,166,0.3);color:#2dd4bf;">PDA escrow</span>
+          <span class="tag" style="border-color:rgba(20,184,166,0.3);color:#2dd4bf;">SOL-denominated</span>
+          <span class="tag" style="border-color:rgba(20,184,166,0.3);color:#2dd4bf;">1% dev fee</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- STR flow diagram -->
+    <div class="highlight-box fade-in" style="margin-top:56px;">
+      <h3 style="font-size:1.1rem; margin-bottom:24px; text-align:center;">How $STR flows through the game</h3>
+      <div style="display:flex; flex-wrap:wrap; gap:0; align-items:center; justify-content:center;">
+        <div style="text-align:center; padding:16px 20px;">
+          <div style="font-size:1.8rem; margin-bottom:6px;">🎮</div>
+          <div style="font-size:0.78rem; font-weight:700; color:#fff;">Player earns STR</div>
+          <div style="font-size:0.72rem; color:var(--text-muted); margin-top:2px;">via leaderboard</div>
+        </div>
+        <div style="color:var(--text-muted); font-size:1.4rem; padding:0 4px;">→</div>
+        <div style="text-align:center; padding:16px 20px;">
+          <div style="font-size:1.8rem; margin-bottom:6px;">📦</div>
+          <div style="font-size:0.78rem; font-weight:700; color:#fff;">Buys chests</div>
+          <div style="font-size:0.72rem; color:var(--text-muted); margin-top:2px;">spending STR</div>
+        </div>
+        <div style="color:var(--text-muted); font-size:1.4rem; padding:0 4px;">→</div>
+        <div style="text-align:center; padding:16px 20px;">
+          <div style="font-size:1.8rem; margin-bottom:6px;">🔥</div>
+          <div style="font-size:0.78rem; font-weight:700; color:#f87171;">~1% burned</div>
+          <div style="font-size:0.72rem; color:var(--text-muted); margin-top:2px;">permanent deflation</div>
+        </div>
+        <div style="color:var(--text-muted); font-size:1.4rem; padding:0 4px;">→</div>
+        <div style="text-align:center; padding:16px 20px;">
+          <div style="font-size:1.8rem; margin-bottom:6px;">🏦</div>
+          <div style="font-size:0.78rem; font-weight:700; color:#fff;">Treasury fills</div>
+          <div style="font-size:0.72rem; color:var(--text-muted); margin-top:2px;">remainder deposited</div>
+        </div>
+        <div style="color:var(--text-muted); font-size:1.4rem; padding:0 4px;">→</div>
+        <div style="text-align:center; padding:16px 20px;">
+          <div style="font-size:1.8rem; margin-bottom:6px;">🔒</div>
+          <div style="font-size:0.78rem; font-weight:700; color:var(--accent-gold);">Stakers earn</div>
+          <div style="font-size:0.72rem; color:var(--text-muted); margin-top:2px;">yield from treasury</div>
+        </div>
+        <div style="color:var(--text-muted); font-size:1.4rem; padding:0 4px;">→</div>
+        <div style="text-align:center; padding:16px 20px;">
+          <div style="font-size:1.8rem; margin-bottom:6px;">🎮</div>
+          <div style="font-size:0.78rem; font-weight:700; color:#fff;">Buy more chests</div>
+          <div style="font-size:0.72rem; color:var(--text-muted); margin-top:2px;">loop repeats</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Frontend -->
+<section>
   <div class="container">
     <div class="fade-in">
       <span class="section-label">Layer 1</span>
       <h2 class="section-title">Frontend</h2>
-      <p class="section-subtitle">As of now, a lightweight, no-framework stack keeps the game fast, auditable, and easy to embed in an iOS WebView wrapper — which would be the next step having now built a working prototype on GitHub. That's what we need from a professional web designer: take this prototype and wrap it in a native iOS shell.</p>
+      <p class="section-subtitle">A lightweight, no-framework stack keeps the game fast, auditable, and easy to embed in an iOS WebView wrapper. That's what we need from a professional developer — take this prototype and wrap it in a native iOS shell.</p>
     </div>
 
     <div class="grid-2 fade-in">
       <div>
         <h3 style="margin-bottom:16px; font-size:1.1rem;">Wallet Integration</h3>
-        <p style="color:var(--text-secondary); font-size:0.92rem; margin-bottom:8px;">
-          The Phantom Wallet React Native SDK provides a <code style="background:rgba(255,255,255,0.08);padding:2px 6px;border-radius:4px;font-size:0.82rem;">window.solana</code> object.
-          Users connect once and sign transactions without leaving the app. All key management
-          stays in Phantom — Orbi never touches private keys.
+        <p style="color:var(--text-secondary); font-size:0.92rem; margin-bottom:12px;">
+          The Phantom Wallet React Native SDK provides a <code style="background:rgba(255,255,255,0.08);padding:2px 6px;border-radius:4px;font-size:0.82rem;">window.solana</code> object. Users connect once and sign transactions without leaving the app. All key management stays in Phantom — Orbi never touches private keys.
         </p>
-        <p style="color:var(--text-secondary); font-size:0.92rem; margin-bottom:8px;">
-          When a user connects their Phantom wallet, the SDK returns their <strong style="color:#fff;">public key</strong> — a unique wallet address that identifies them on-chain. This becomes their player ID throughout the entire game. Orbi stores only this public key; the private key never leaves the user's device.
+        <p style="color:var(--text-secondary); font-size:0.92rem; margin-bottom:12px;">
+          When a user connects, the SDK returns their <strong style="color:#fff;">public key</strong> — a unique wallet address that becomes their player ID throughout the entire game. The private key never leaves their device. Because the app is built in JavaScript, the same codebase runs on both <strong style="color:#fff;">iOS and Android</strong> — no rewrite needed when we expand.
         </p>
-        <p style="color:var(--text-secondary); font-size:0.92rem; margin-bottom:16px;">
-          Because the app is built in JavaScript, the Phantom Wallet React Native SDK works on both <strong style="color:#fff;">iOS and Android</strong> — so the codebase won't be redundant if we expand to Android later. No rewrite required.
+        <p style="color:var(--text-secondary); font-size:0.92rem; margin-bottom:20px;">
+          Every action that touches real value — buying a chest, listing a marketplace item, staking STR — triggers a <strong style="color:#fff;">Phantom wallet signature prompt</strong>. The user approves it in Phantom, the signed transaction is broadcast to Solana, and the result is confirmed on-chain before the game UI updates. The game never assumes a transaction succeeded — it waits for on-chain confirmation.
         </p>
-        <div class="code-block"><span class="cm">// Connect Phantom wallet — outputs user's public key</span>
-<span class="kw">const</span> provider = window.solana;
-<span class="kw">if</span> (provider?.isPhantom) {
-  <span class="kw">const</span> resp = <span class="kw">await</span> provider.<span class="fn">connect</span>();
-  <span class="kw">const</span> pubkey = resp.publicKey.<span class="fn">toString</span>();
-  <span class="cm">// pubkey is now the player's on-chain wallet address</span>
-  <span class="cm">// e.g. "7xKXtg2CW87d97TXJSDpbD5jBkheTqA83TZRuJosgHU"</span>
-  <span class="fn">console</span>.<span class="fn">log</span>(<span class="st">"Connected:"</span>, pubkey);
-}</div>
-
-        <div style="margin-top:20px; background:rgba(124,58,237,0.07); border:1px solid rgba(168,85,247,0.2); border-radius:var(--radius); padding:16px;">
+        <div style="background:rgba(124,58,237,0.07); border:1px solid rgba(168,85,247,0.2); border-radius:var(--radius); padding:16px;">
           <p style="font-size:0.85rem; color:var(--text-secondary); margin:0;"><strong style="color:var(--accent-purple-lt);">What is an iOS WebView Wrapper?</strong><br/><br/>
-          An iOS WebView wrapper is a native iPhone app shell that contains a website inside it. Instead of building the entire app in Swift, you create: (1) an iOS app container, (2) with a WebView component inside it, (3) and that WebView loads your web app. The user sees and interacts with a normal iPhone app — they'd never know it's a website running inside it. This is the standard approach for shipping a web prototype as an App Store app.</p>
+          An iOS WebView wrapper is a native iPhone app shell that loads a web app inside it. Instead of rebuilding the game in Swift, you create an iOS container with a WebView component, and that WebView loads Orbi. The user interacts with a normal-feeling iPhone app — they'd never know it's a website inside. This is the standard approach for shipping a web prototype on the App Store.</p>
         </div>
       </div>
 
@@ -306,18 +427,26 @@
           <span class="tech-pill">iOS WebView</span>
           <span class="tech-pill">Fetch API</span>
         </div>
-        <div style="margin-top:24px;">
-          <h3 style="margin-bottom:12px; font-size:1.1rem;">Sending a Transaction</h3>
-          <div class="code-block"><span class="kw">import</span> { Connection, Transaction }
-  <span class="kw">from</span> <span class="st">"@solana/web3.js"</span>;
 
-<span class="kw">const</span> conn = <span class="kw">new</span> <span class="fn">Connection</span>(RPC_URL);
-<span class="kw">const</span> tx = <span class="kw">new</span> <span class="fn">Transaction</span>().<span class="fn">add</span>(ix);
-tx.feePayer = wallet.publicKey;
-tx.recentBlockhash = (<span class="kw">await</span>
-  conn.<span class="fn">getLatestBlockhash</span>()).blockhash;
-<span class="kw">const</span> signed = <span class="kw">await</span> wallet.<span class="fn">signTransaction</span>(tx);
-<span class="kw">await</span> conn.<span class="fn">sendRawTransaction</span>(signed.<span class="fn">serialize</span>());</div>
+        <div style="margin-top:28px;">
+          <h3 style="margin-bottom:16px; font-size:1.1rem;">What the frontend handles</h3>
+          <ul style="list-style:none;">
+            <li style="display:flex;gap:12px;padding:10px 0;border-bottom:1px solid var(--border);font-size:0.9rem;color:var(--text-secondary);">
+              <span style="color:var(--accent-purple-lt);">▸</span> Wallet connection and transaction signing via Phantom SDK
+            </li>
+            <li style="display:flex;gap:12px;padding:10px 0;border-bottom:1px solid var(--border);font-size:0.9rem;color:var(--text-secondary);">
+              <span style="color:var(--accent-purple-lt);">▸</span> Rendering the game UI — farming plots, Moon character, inventory, leaderboard
+            </li>
+            <li style="display:flex;gap:12px;padding:10px 0;border-bottom:1px solid var(--border);font-size:0.9rem;color:var(--text-secondary);">
+              <span style="color:var(--accent-purple-lt);">▸</span> REST calls to the Python backend for player state, farm timers, leaderboard data
+            </li>
+            <li style="display:flex;gap:12px;padding:10px 0;border-bottom:1px solid var(--border);font-size:0.9rem;color:var(--text-secondary);">
+              <span style="color:var(--accent-purple-lt);">▸</span> Displaying real-time energy/hunger bars, chest opening animations, marketplace listings
+            </li>
+            <li style="display:flex;gap:12px;padding:10px 0;font-size:0.9rem;color:var(--text-secondary);">
+              <span style="color:var(--accent-purple-lt);">▸</span> On-chain confirmation polling — UI only updates after transaction is confirmed on Solana
+            </li>
+          </ul>
         </div>
       </div>
     </div>
@@ -489,70 +618,33 @@ app = <span class="fn">FastAPI</span>()
       </div>
     </div>
 
-    <div class="grid-2 fade-in">
-      <div>
-        <h3 style="margin-bottom:16px; font-size:1.1rem;">On-chain Instructions</h3>
-        <ul style="list-style:none;">
-          <li style="padding:10px 0; border-bottom:1px solid var(--border); display:flex; gap:12px; font-size:0.9rem; color:var(--text-secondary);">
-            <span class="tag-teal tag" style="flex-shrink:0;">register_player</span>
-            Transfer 1 SOL entry fee, mint Moon NFT to player
-          </li>
-          <li style="padding:10px 0; border-bottom:1px solid var(--border); display:flex; gap:12px; font-size:0.9rem; color:var(--text-secondary);">
-            <span class="tag-teal tag" style="flex-shrink:0;">buy_chest</span>
-            Burn STR → emit chest open event, roll rarity on-chain
-          </li>
-          <li style="padding:10px 0; border-bottom:1px solid var(--border); display:flex; gap:12px; font-size:0.9rem; color:var(--text-secondary);">
-            <span class="tag-teal tag" style="flex-shrink:0;">list_item</span>
-            Escrow item NFT into marketplace PDA, set SOL price
-          </li>
-          <li style="padding:10px 0; border-bottom:1px solid var(--border); display:flex; gap:12px; font-size:0.9rem; color:var(--text-secondary);">
-            <span class="tag-teal tag" style="flex-shrink:0;">buy_item</span>
-            Transfer SOL to seller (99%) + dev wallet (1%), release NFT
-          </li>
-          <li style="padding:10px 0; border-bottom:1px solid var(--border); display:flex; gap:12px; font-size:0.9rem; color:var(--text-secondary);">
-            <span class="tag-teal tag" style="flex-shrink:0;">stake_str</span>
-            Lock STR in PDA, record unlock timestamp + yield rate
-          </li>
-          <li style="padding:10px 0; display:flex; gap:12px; font-size:0.9rem; color:var(--text-secondary);">
-            <span class="tag-teal tag" style="flex-shrink:0;">claim_rewards</span>
-            Verify unlock time, transfer STR from treasury, close PDA
-          </li>
-        </ul>
-      </div>
-
-      <div>
-        <h3 style="margin-bottom:16px; font-size:1.1rem;">Sample: Anchor Program Structure</h3>
-        <div class="code-block"><span class="cm">// Anchor smart contract (Rust)</span>
-<span class="kw">use</span> anchor_lang::prelude::*;
-
-<span class="fn">declare_id!</span>(<span class="st">"OrbiXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"</span>);
-
-<span class="kw">#[program]</span>
-<span class="kw">pub mod</span> orbi {
-  <span class="kw">use super</span>::*;
-
-  <span class="kw">pub fn</span> <span class="fn">register_player</span>(ctx: Context&lt;Register&gt;)
-    -> Result&lt;()&gt;
-  {
-    <span class="kw">let</span> fee = <span class="nm">1_000_000_000</span>u64; <span class="cm">// 1 SOL</span>
-    system_program::<span class="fn">transfer</span>(
-      CpiContext::<span class="fn">new</span>(
-        ctx.accounts.system_program.<span class="fn">to_account_info</span>(),
-        system_program::Transfer {
-          from: ctx.accounts.player.<span class="fn">to_account_info</span>(),
-          to:   ctx.accounts.treasury.<span class="fn">to_account_info</span>(),
-        },
-      ), fee,
-    )?;
-    <span class="kw">let</span> player = &<span class="kw">mut</span> ctx.accounts.player_account;
-    player.owner   = ctx.accounts.player.key();
-    player.level   = <span class="nm">1</span>;
-    player.xp      = <span class="nm">0</span>;
-    player.energy  = <span class="nm">100</span>;
-    player.hunger  = <span class="nm">100</span>;
-    <span class="fn">Ok</span>(())
-  }
-}</div>
+    <div class="fade-in">
+      <h3 style="margin-bottom:20px; font-size:1.1rem;">On-chain Instructions</h3>
+      <div style="display:flex; flex-direction:column; gap:0;">
+        <div style="display:grid; grid-template-columns:180px 1fr; gap:20px; padding:16px 0; border-bottom:1px solid var(--border); align-items:start;">
+          <span class="tag-teal tag" style="justify-self:start;">register_player</span>
+          <div style="font-size:0.9rem; color:var(--text-secondary);">Collects the 1 SOL entry fee from the player's wallet and transfers it to the dev treasury. Mints the Moon character as a soul-bound NFT to the player's wallet — one per wallet, enforced at the contract level. Initialises the player account on-chain with level 1, XP 0, full energy and hunger.</div>
+        </div>
+        <div style="display:grid; grid-template-columns:180px 1fr; gap:20px; padding:16px 0; border-bottom:1px solid var(--border); align-items:start;">
+          <span class="tag-teal tag" style="justify-self:start;">buy_chest</span>
+          <div style="font-size:0.9rem; color:var(--text-secondary);">Burns the STR cost of the chest (~1% is permanently destroyed), routes the remainder to the staking treasury, and rolls item rarity on-chain using a verifiable random seed. The resulting item NFT is minted to the player's wallet. Rarity is immutable — it cannot be changed after minting.</div>
+        </div>
+        <div style="display:grid; grid-template-columns:180px 1fr; gap:20px; padding:16px 0; border-bottom:1px solid var(--border); align-items:start;">
+          <span class="tag-teal tag" style="justify-self:start;">list_item</span>
+          <div style="font-size:0.9rem; color:var(--text-secondary);">Transfers the item NFT into a Program Derived Address (PDA) escrow vault owned exclusively by the smart contract. The player sets a SOL price. The item is held safely — the seller cannot withdraw it, and the buyer cannot take it without paying. Neither party can be rugged.</div>
+        </div>
+        <div style="display:grid; grid-template-columns:180px 1fr; gap:20px; padding:16px 0; border-bottom:1px solid var(--border); align-items:start;">
+          <span class="tag-teal tag" style="justify-self:start;">buy_item</span>
+          <div style="font-size:0.9rem; color:var(--text-secondary);">Atomically: transfers 99% of the SOL price to the seller, 1% to the developer wallet, and releases the NFT from escrow to the buyer — all in a single transaction. If any step fails, the whole transaction reverts. There is no state in which payment is made but the item is not delivered.</div>
+        </div>
+        <div style="display:grid; grid-template-columns:180px 1fr; gap:20px; padding:16px 0; border-bottom:1px solid var(--border); align-items:start;">
+          <span class="tag-teal tag" style="justify-self:start;">stake_str</span>
+          <div style="font-size:0.9rem; color:var(--text-secondary);">Locks the chosen STR amount in a PDA vault, records the unlock timestamp (current time + lock duration) and the applicable yield rate for the selected tier. The PDA has no private key — only the contract logic can release it. Even the developer cannot move staked tokens before unlock.</div>
+        </div>
+        <div style="display:grid; grid-template-columns:180px 1fr; gap:20px; padding:16px 0; align-items:start;">
+          <span class="tag-teal tag" style="justify-self:start;">claim_rewards</span>
+          <div style="font-size:0.9rem; color:var(--text-secondary);">Available only after the unlock timestamp is reached. Verifies the clock, calculates yield earned for the exact duration staked, transfers principal + yield from the staking treasury to the player's wallet, and closes the PDA — returning its rent lamports to the player.</div>
+        </div>
       </div>
     </div>
 
@@ -776,50 +868,107 @@ app = <span class="fn">FastAPI</span>()
       </div>
     </div>
 
-    <!-- Treasury flow -->
-    <div class="grid-3 fade-in" style="margin-top:40px;">
-      <div class="card">
-        <span class="card-icon">📦</span>
-        <h3>Chest Purchases Fund Stakes</h3>
-        <p style="color:var(--text-secondary); font-size:0.9rem;">When players buy chests with $STR, the majority (after burn) routes directly to the staking treasury. This means staking yields grow as the game gets more popular — the economic incentive aligns perfectly.</p>
+    <!-- Why staking matters -->
+    <div class="fade-in" style="margin-top:56px;">
+      <h3 style="font-size:1.2rem; font-weight:800; margin-bottom:8px; text-align:center;">Why staking is central to the token model</h3>
+      <p style="color:var(--text-secondary); font-size:0.92rem; max-width:660px; margin:0 auto 40px; text-align:center;">Staking is not an afterthought — it's the primary mechanism keeping $STR from hyperinflating. The design is deliberately borrowed from lessons learned from Axie Infinity's collapse.</p>
+    </div>
+
+    <div class="grid-2 fade-in" style="margin-top:0;">
+      <div class="card" style="border-color:rgba(239,68,68,0.3); background:linear-gradient(135deg,rgba(239,68,68,0.04),rgba(239,68,68,0.01));">
+        <span class="card-icon">📉</span>
+        <h3 style="color:#f87171;">What Axie Infinity got wrong</h3>
+        <p style="color:var(--text-secondary); font-size:0.9rem; line-height:1.7;">Axie Infinity minted new SLP tokens to pay rewards with every game action. More players → more minting → more supply → token price collapses. There was no meaningful mechanism to remove tokens from circulation. Staking existed but paid rewards via fresh minting — the very thing that caused the death spiral. Within 18 months, SLP fell 99% from its peak.</p>
       </div>
-      <div class="card">
-        <span class="card-icon">🔒</span>
-        <h3>Supply Lock Reduces Sell Pressure</h3>
-        <p style="color:var(--text-secondary); font-size:0.9rem;">Every staked token is removed from the circulating supply for the duration of the lock. At scale, with a significant proportion staked in 90- or 180-day positions, the liquid supply contracts substantially — supporting price stability.</p>
-      </div>
-      <div class="card">
-        <span class="card-icon">⚖️</span>
-        <h3>Governance Weight for Stakers</h3>
-        <p style="color:var(--text-secondary); font-size:0.9rem;">In Phase 4 governance, staking position duration determines opposition weight. A 180-day staker carries more governance weight than a 30-day staker — rewarding long-term believers who have the most to gain from Orbi's success.</p>
+
+      <div class="card" style="border-color:rgba(34,197,94,0.3); background:linear-gradient(135deg,rgba(34,197,94,0.04),rgba(34,197,94,0.01));">
+        <span class="card-icon">📈</span>
+        <h3 style="color:#4ade80;">What Orbi does differently</h3>
+        <p style="color:var(--text-secondary); font-size:0.9rem; line-height:1.7;">$STR has a <strong style="color:#fff;">fixed supply — no minting after launch</strong>. Staking rewards come <strong style="color:#fff;">entirely from the 40% treasury allocation</strong>, not new tokens. Chest purchases burn ~1% of every transaction and route the remainder to the treasury. This means the game generates its own staking fuel through real player spend — not inflation. The treasury runs for years before depletion even at full player load.</p>
       </div>
     </div>
 
-    <!-- Code snippet -->
-    <div class="highlight-box fade-in" style="margin-top:40px;">
-      <h3 style="margin-bottom:20px; font-size:1.1rem;">Sample: Anchor Stake Instruction</h3>
-      <div class="code-block"><span class="kw">pub fn</span> <span class="fn">stake_str</span>(ctx: Context&lt;StakeStr&gt;, amount: u64, tier: u8)
-  -> Result&lt;()&gt;
-{
-  <span class="cm">// Validate tier (0 = 30d, 1 = 90d, 2 = 180d)</span>
-  <span class="kw">let</span> lock_seconds: i64 = <span class="kw">match</span> tier {
-    <span class="nm">0</span> => <span class="nm">30</span>  * <span class="nm">86400</span>,
-    <span class="nm">1</span> => <span class="nm">90</span>  * <span class="nm">86400</span>,
-    <span class="nm">2</span> => <span class="nm">180</span> * <span class="nm">86400</span>,
-    _  => <span class="kw">return</span> <span class="fn">Err</span>(OrbiError::InvalidTier.into()),
-  };
+    <!-- Stats row -->
+    <div class="highlight-box fade-in" style="margin-top:32px;">
+      <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:32px; text-align:center;">
+        <div>
+          <div style="font-size:2rem; font-weight:900; background:var(--grad-primary);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">40%</div>
+          <div style="font-size:0.82rem; color:var(--text-secondary); margin-top:6px;">of total $STR supply reserved exclusively for staking rewards</div>
+        </div>
+        <div>
+          <div style="font-size:2rem; font-weight:900; background:var(--grad-gold);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">~1%</div>
+          <div style="font-size:0.82rem; color:var(--text-secondary); margin-top:6px;">of every chest purchase permanently burned — deflationary by design</div>
+        </div>
+        <div>
+          <div style="font-size:2rem; font-weight:900; background:var(--grad-teal);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">Zero</div>
+          <div style="font-size:0.82rem; color:var(--text-secondary); margin-top:6px;">new $STR ever minted to pay yields — hard rule at the contract level</div>
+        </div>
+        <div>
+          <div style="font-size:2rem; font-weight:900; color:#fff;">180d</div>
+          <div style="font-size:0.82rem; color:var(--text-secondary); margin-top:6px;">maximum lock period — removes tokens from circulation the longest</div>
+        </div>
+      </div>
+    </div>
 
-  <span class="cm">// Transfer STR from player to PDA vault</span>
-  token::<span class="fn">transfer</span>(ctx.<span class="fn">accounts</span>().<span class="fn">into_transfer_ctx</span>(), amount)?;
+    <!-- Chest → Treasury → Staking flow -->
+    <div class="grid-3 fade-in" style="margin-top:32px;">
+      <div class="card">
+        <span class="card-icon">📦</span>
+        <h3>Chest Purchases Refuel the Treasury</h3>
+        <p style="color:var(--text-secondary); font-size:0.9rem;">Every chest a player buys with $STR deposits the majority (post-burn) into the staking treasury. As the player base grows and chest demand rises, the treasury refills faster — staking yields become more sustainable, not less. Growth is self-reinforcing rather than inflationary.</p>
+      </div>
+      <div class="card">
+        <span class="card-icon">🔒</span>
+        <h3>Locks Contract Circulating Supply</h3>
+        <p style="color:var(--text-secondary); font-size:0.9rem;">Every staked token is out of circulation for the duration of the lock. A player staking 10,000 STR for 180 days removes that supply for 6 months. At scale — say 30% of all STR staked in long positions — the effective float contracts sharply, creating natural upward price pressure without any artificial mechanism.</p>
+      </div>
+      <div class="card">
+        <span class="card-icon">⚖️</span>
+        <h3>Governance Weight for Long Stakers</h3>
+        <p style="color:var(--text-secondary); font-size:0.9rem;">In Phase 4, staking tier determines how much weight your opposition vote carries. A 180-day staker has the most at stake in Orbi's long-term direction — so they get the most say. Short-term holders carry less weight. This aligns governance with the people who are most committed to the project's success.</p>
+      </div>
+    </div>
 
-  <span class="cm">// Write stake record on-chain</span>
-  <span class="kw">let</span> stake = &<span class="kw">mut</span> ctx.accounts.stake_account;
-  stake.owner      = ctx.accounts.player.key();
-  stake.amount     = amount;
-  stake.tier       = tier;
-  stake.unlock_at  = <span class="fn">Clock::get</span>()?.unix_timestamp + lock_seconds;
-  <span class="fn">Ok</span>(())
-}</div>
+    <!-- Example return table -->
+    <div class="highlight-box fade-in" style="margin-top:32px;">
+      <h3 style="font-size:1.1rem; margin-bottom:20px;">Example staking returns</h3>
+      <div style="overflow-x:auto;">
+        <table style="width:100%; border-collapse:collapse; font-size:0.88rem;">
+          <thead>
+            <tr>
+              <th style="text-align:left; padding:10px 16px; background:rgba(124,58,237,0.1); color:var(--accent-purple-lt); font-size:0.72rem; font-weight:700; letter-spacing:1.5px; text-transform:uppercase; border-bottom:1px solid var(--border);">Tier</th>
+              <th style="text-align:left; padding:10px 16px; background:rgba(124,58,237,0.1); color:var(--accent-purple-lt); font-size:0.72rem; font-weight:700; letter-spacing:1.5px; text-transform:uppercase; border-bottom:1px solid var(--border);">Lock Period</th>
+              <th style="text-align:left; padding:10px 16px; background:rgba(124,58,237,0.1); color:var(--accent-purple-lt); font-size:0.72rem; font-weight:700; letter-spacing:1.5px; text-transform:uppercase; border-bottom:1px solid var(--border);">APY</th>
+              <th style="text-align:left; padding:10px 16px; background:rgba(124,58,237,0.1); color:var(--accent-purple-lt); font-size:0.72rem; font-weight:700; letter-spacing:1.5px; text-transform:uppercase; border-bottom:1px solid var(--border);">Stake 1,000 STR → earns</th>
+              <th style="text-align:left; padding:10px 16px; background:rgba(124,58,237,0.1); color:var(--accent-purple-lt); font-size:0.72rem; font-weight:700; letter-spacing:1.5px; text-transform:uppercase; border-bottom:1px solid var(--border);">Stake 10,000 STR → earns</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td style="padding:12px 16px; border-bottom:1px solid rgba(255,255,255,0.04); color:var(--text-secondary);">🌒 Short</td>
+              <td style="padding:12px 16px; border-bottom:1px solid rgba(255,255,255,0.04); color:#fff; font-weight:600;">30 days</td>
+              <td style="padding:12px 16px; border-bottom:1px solid rgba(255,255,255,0.04);"><span style="background:var(--grad-primary);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text; font-weight:800;">5%</span></td>
+              <td style="padding:12px 16px; border-bottom:1px solid rgba(255,255,255,0.04); color:var(--text-secondary);">~13.7 STR</td>
+              <td style="padding:12px 16px; border-bottom:1px solid rgba(255,255,255,0.04); color:var(--text-secondary);">~137 STR</td>
+            </tr>
+            <tr>
+              <td style="padding:12px 16px; border-bottom:1px solid rgba(255,255,255,0.04); color:var(--text-secondary);">🌓 Medium</td>
+              <td style="padding:12px 16px; border-bottom:1px solid rgba(255,255,255,0.04); color:#fff; font-weight:600;">90 days</td>
+              <td style="padding:12px 16px; border-bottom:1px solid rgba(255,255,255,0.04);"><span style="background:var(--grad-teal);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text; font-weight:800;">12%</span></td>
+              <td style="padding:12px 16px; border-bottom:1px solid rgba(255,255,255,0.04); color:var(--text-secondary);">~29.6 STR</td>
+              <td style="padding:12px 16px; border-bottom:1px solid rgba(255,255,255,0.04); color:var(--text-secondary);">~296 STR</td>
+            </tr>
+            <tr>
+              <td style="padding:12px 16px; color:var(--text-secondary);">🌕 Long</td>
+              <td style="padding:12px 16px; color:#fff; font-weight:600;">180 days</td>
+              <td style="padding:12px 16px;"><span style="background:var(--grad-gold);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text; font-weight:800;">20%</span></td>
+              <td style="padding:12px 16px; color:var(--text-secondary);">~98.6 STR</td>
+              <td style="padding:12px 16px; color:var(--text-secondary);">~986 STR</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <p style="font-size:0.78rem; color:var(--text-muted); margin-top:14px; margin-bottom:0;">Returns calculated pro-rata for the lock period. All yields paid from treasury — zero new minting.</p>
     </div>
   </div>
 </section>
