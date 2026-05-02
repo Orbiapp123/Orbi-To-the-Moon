@@ -1,0 +1,896 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Orbi: To the Moon — Technical</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    .fade-in {
+      opacity: 0;
+      transform: translateY(28px);
+      transition: opacity 0.6s ease, transform 0.6s ease;
+    }
+    .fade-in.visible { opacity: 1; transform: translateY(0); }
+
+    /* Architecture diagram */
+    .arch-diagram {
+      display: grid;
+      grid-template-columns: 1fr auto 1fr auto 1fr;
+      align-items: center;
+      gap: 0;
+      margin: 48px 0;
+      overflow-x: auto;
+    }
+
+    .arch-layer {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 28px 20px;
+      text-align: center;
+      position: relative;
+    }
+
+    .arch-layer .layer-icon { font-size: 2.4rem; margin-bottom: 10px; display: block; }
+    .arch-layer .layer-name {
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--accent-purple-lt);
+      margin-bottom: 6px;
+    }
+    .arch-layer h3 { font-size: 1rem; font-weight: 700; margin-bottom: 8px; }
+    .arch-layer p { font-size: 0.8rem; color: var(--text-secondary); }
+
+    .arch-arrow {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      padding: 0 16px;
+      color: var(--text-muted);
+      font-size: 0.7rem;
+      text-align: center;
+      min-width: 80px;
+    }
+
+    .arrow-line {
+      width: 60px; height: 2px;
+      background: linear-gradient(90deg, var(--accent-purple), var(--accent-blue));
+      position: relative;
+    }
+
+    .arrow-line::after {
+      content: '▶';
+      position: absolute;
+      right: -6px; top: -8px;
+      font-size: 10px;
+      color: var(--accent-blue);
+    }
+
+    @media (max-width: 900px) {
+      .arch-diagram {
+        grid-template-columns: 1fr;
+      }
+      .arch-arrow { transform: rotate(90deg); margin: 8px auto; }
+    }
+
+    /* Tech stack pills */
+    .tech-stack-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 16px;
+    }
+
+    .tech-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 8px 14px;
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: var(--text-secondary);
+      transition: all 0.2s;
+    }
+
+    .tech-pill:hover {
+      border-color: var(--border-bright);
+      color: var(--text-primary);
+      background: rgba(124,58,237,0.08);
+    }
+
+    /* API table */
+    .api-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.85rem;
+    }
+
+    .api-table th {
+      text-align: left;
+      padding: 12px 16px;
+      background: rgba(124,58,237,0.1);
+      color: var(--accent-purple-lt);
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .api-table td {
+      padding: 12px 16px;
+      border-bottom: 1px solid rgba(255,255,255,0.04);
+      color: var(--text-secondary);
+      vertical-align: top;
+    }
+
+    .api-table tr:hover td { background: rgba(255,255,255,0.02); }
+
+    .method {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.75rem;
+      font-weight: 600;
+      padding: 2px 8px;
+      border-radius: 4px;
+    }
+    .get  { background: rgba(34,197,94,0.15);  color: #4ade80; }
+    .post { background: rgba(59,130,246,0.15); color: #60a5fa; }
+    .put  { background: rgba(251,191,36,0.15); color: #fbbf24; }
+
+    .endpoint-path {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.8rem;
+      color: var(--text-primary);
+    }
+
+    /* Security items */
+    .security-item {
+      display: flex;
+      gap: 16px;
+      padding: 20px 0;
+      border-bottom: 1px solid var(--border);
+    }
+    .security-item:last-child { border-bottom: none; }
+    .security-num {
+      width: 32px; height: 32px;
+      border-radius: 8px;
+      background: var(--grad-primary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.8rem;
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+  </style>
+</head>
+<body>
+
+<canvas id="stars-canvas"></canvas>
+
+<nav class="navbar">
+  <div class="nav-inner">
+    <span class="nav-logo">☽ Orbi</span>
+    <ul class="nav-links">
+      <li><a href="index.html">Home</a></li>
+      <li><a href="technical.html">Technical</a></li>
+      <li><a href="strategy.html">Strategy</a></li>
+      <li><a href="brand.html">Brand</a></li>
+      <li><a href="https://orbiapp123.github.io/Orbi-To-the-Moon/Whitepaper/Orbi_Whitepaper.pdf" target="_blank" class="nav-cta-ghost">📄 Whitepaper</a></li>
+      <li><a href="../Game/game-hub.html" class="nav-cta">🎮 Play Demo →</a></li>
+    </ul>
+  </div>
+</nav>
+
+<!-- Header -->
+<div class="page-header">
+  <div class="container">
+    <span class="page-badge">Technical Architecture</span>
+    <h1>How <span class="grad-text">Orbi</span> is Built</h1>
+    <p>A three-layer stack: HTML/JS frontend, Python backend APIs, and a Rust/Anchor smart contract on Solana.</p>
+  </div>
+</div>
+
+<!-- Architecture Overview -->
+<section>
+  <div class="container">
+    <div class="text-center fade-in">
+      <span class="section-label">System Architecture</span>
+      <h2 class="section-title">Three layers. One seamless experience.</h2>
+      <p class="section-subtitle">Each layer has a single, clear responsibility — frontend renders and connects wallets, backend indexes and serves data, blockchain handles true ownership of accessories, $STR, and SOL.</p>
+    </div>
+
+    <div class="arch-diagram fade-in">
+      <div class="arch-layer" style="border-color: rgba(168,85,247,0.4);">
+        <span class="layer-icon">🖥️</span>
+        <div class="layer-name">Layer 1</div>
+        <h3>Frontend</h3>
+        <p>HTML · CSS · JavaScript<br/>Phantom Wallet SDK</p>
+        <div style="margin-top:12px;">
+          <span class="tag">iOS WebView</span>
+          <span class="tag">Mobile-first</span>
+        </div>
+      </div>
+
+      <div class="arch-arrow">
+        <div class="arrow-line"></div>
+        <span>REST / JSON</span>
+      </div>
+
+      <div class="arch-layer" style="border-color: rgba(59,130,246,0.4);">
+        <span class="layer-icon">🐍</span>
+        <div class="layer-name">Layer 2</div>
+        <h3>Backend</h3>
+        <p>Python · FastAPI<br/>PostgreSQL · Redis</p>
+        <div style="margin-top:12px;">
+          <span class="tag-blue tag">API Server</span>
+          <span class="tag-blue tag">Indexer</span>
+        </div>
+      </div>
+
+      <div class="arch-arrow">
+        <div class="arrow-line"></div>
+        <span>Solana RPC</span>
+      </div>
+
+      <div class="arch-layer" style="border-color: rgba(20,184,166,0.4);">
+        <span class="layer-icon">⛓️</span>
+        <div class="layer-name">Layer 3</div>
+        <h3>Blockchain</h3>
+        <p>Rust · Anchor<br/>Solana Devnet → Mainnet</p>
+        <div style="margin-top:12px;">
+          <span class="tag-teal tag">Smart Contract</span>
+          <span class="tag-teal tag">$STR Token</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Frontend -->
+<section style="background: rgba(255,255,255,0.015); border-top:1px solid var(--border); border-bottom:1px solid var(--border);">
+  <div class="container">
+    <div class="fade-in">
+      <span class="section-label">Layer 1</span>
+      <h2 class="section-title">Frontend</h2>
+      <p class="section-subtitle">As of now, a lightweight, no-framework stack keeps the game fast, auditable, and easy to embed in an iOS WebView wrapper — which would be the next step having now built a working prototype on GitHub. That's what we need from a professional web designer: take this prototype and wrap it in a native iOS shell.</p>
+    </div>
+
+    <div class="grid-2 fade-in">
+      <div>
+        <h3 style="margin-bottom:16px; font-size:1.1rem;">Wallet Integration</h3>
+        <p style="color:var(--text-secondary); font-size:0.92rem; margin-bottom:8px;">
+          The Phantom Wallet React Native SDK provides a <code style="background:rgba(255,255,255,0.08);padding:2px 6px;border-radius:4px;font-size:0.82rem;">window.solana</code> object.
+          Users connect once and sign transactions without leaving the app. All key management
+          stays in Phantom — Orbi never touches private keys.
+        </p>
+        <p style="color:var(--text-secondary); font-size:0.92rem; margin-bottom:8px;">
+          When a user connects their Phantom wallet, the SDK returns their <strong style="color:#fff;">public key</strong> — a unique wallet address that identifies them on-chain. This becomes their player ID throughout the entire game. Orbi stores only this public key; the private key never leaves the user's device.
+        </p>
+        <p style="color:var(--text-secondary); font-size:0.92rem; margin-bottom:16px;">
+          Because the app is built in JavaScript, the Phantom Wallet React Native SDK works on both <strong style="color:#fff;">iOS and Android</strong> — so the codebase won't be redundant if we expand to Android later. No rewrite required.
+        </p>
+        <div class="code-block"><span class="cm">// Connect Phantom wallet — outputs user's public key</span>
+<span class="kw">const</span> provider = window.solana;
+<span class="kw">if</span> (provider?.isPhantom) {
+  <span class="kw">const</span> resp = <span class="kw">await</span> provider.<span class="fn">connect</span>();
+  <span class="kw">const</span> pubkey = resp.publicKey.<span class="fn">toString</span>();
+  <span class="cm">// pubkey is now the player's on-chain wallet address</span>
+  <span class="cm">// e.g. "7xKXtg2CW87d97TXJSDpbD5jBkheTqA83TZRuJosgHU"</span>
+  <span class="fn">console</span>.<span class="fn">log</span>(<span class="st">"Connected:"</span>, pubkey);
+}</div>
+
+        <div style="margin-top:20px; background:rgba(124,58,237,0.07); border:1px solid rgba(168,85,247,0.2); border-radius:var(--radius); padding:16px;">
+          <p style="font-size:0.85rem; color:var(--text-secondary); margin:0;"><strong style="color:var(--accent-purple-lt);">What is an iOS WebView Wrapper?</strong><br/><br/>
+          An iOS WebView wrapper is a native iPhone app shell that contains a website inside it. Instead of building the entire app in Swift, you create: (1) an iOS app container, (2) with a WebView component inside it, (3) and that WebView loads your web app. The user sees and interacts with a normal iPhone app — they'd never know it's a website running inside it. This is the standard approach for shipping a web prototype as an App Store app.</p>
+        </div>
+      </div>
+
+      <div>
+        <h3 style="margin-bottom:16px; font-size:1.1rem;">Tech Stack</h3>
+        <div class="tech-stack-row">
+          <span class="tech-pill">HTML5</span>
+          <span class="tech-pill">CSS3</span>
+          <span class="tech-pill">Vanilla JS</span>
+          <span class="tech-pill">Phantom Wallet React Native SDK</span>
+          <span class="tech-pill">@solana/web3.js</span>
+          <span class="tech-pill">iOS WebView</span>
+          <span class="tech-pill">Fetch API</span>
+        </div>
+        <div style="margin-top:24px;">
+          <h3 style="margin-bottom:12px; font-size:1.1rem;">Sending a Transaction</h3>
+          <div class="code-block"><span class="kw">import</span> { Connection, Transaction }
+  <span class="kw">from</span> <span class="st">"@solana/web3.js"</span>;
+
+<span class="kw">const</span> conn = <span class="kw">new</span> <span class="fn">Connection</span>(RPC_URL);
+<span class="kw">const</span> tx = <span class="kw">new</span> <span class="fn">Transaction</span>().<span class="fn">add</span>(ix);
+tx.feePayer = wallet.publicKey;
+tx.recentBlockhash = (<span class="kw">await</span>
+  conn.<span class="fn">getLatestBlockhash</span>()).blockhash;
+<span class="kw">const</span> signed = <span class="kw">await</span> wallet.<span class="fn">signTransaction</span>(tx);
+<span class="kw">await</span> conn.<span class="fn">sendRawTransaction</span>(signed.<span class="fn">serialize</span>());</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Backend -->
+<section>
+  <div class="container">
+    <div class="fade-in">
+      <span class="section-label">Layer 2</span>
+      <h2 class="section-title">Python Backend</h2>
+      <p class="section-subtitle">The Python backend responds quickly to app requests, while another background process watches the blockchain and updates the app's stored data. FastAPI serves low-latency REST endpoints; a separate background indexer listens to Solana events and keeps the database in sync.</p>
+
+      <div style="background:rgba(59,130,246,0.07); border:1px solid rgba(59,130,246,0.25); border-radius:var(--radius); padding:20px; margin-top:24px;">
+        <p style="font-size:0.9rem; color:var(--text-secondary); margin:0;">
+          <strong style="color:#60a5fa;">What is REST?</strong><br/><br/>
+          REST is a standard way of designing an API so the frontend can talk to the backend through clear URL-based endpoints. Each endpoint does a specific job, and standard HTTP methods are used to show the type of action: for example, <code style="background:rgba(255,255,255,0.08);padding:2px 6px;border-radius:4px;font-size:0.82rem;">GET</code> fetches data and <code style="background:rgba(255,255,255,0.08);padding:2px 6px;border-radius:4px;font-size:0.82rem;">POST</code> sends or triggers an action. In Orbi, routes like <code style="background:rgba(255,255,255,0.08);padding:2px 6px;border-radius:4px;font-size:0.82rem;">/player/{wallet}</code> or <code style="background:rgba(255,255,255,0.08);padding:2px 6px;border-radius:4px;font-size:0.82rem;">/leaderboard</code> are REST API endpoints, and the backend returns the requested information, usually in JSON format.
+        </p>
+      </div>
+    </div>
+
+    <div class="grid-2 fade-in">
+      <div>
+        <h3 style="margin-bottom:16px; font-size:1.1rem;">Responsibilities</h3>
+        <ul class="feature-list" style="list-style:none;">
+          <li style="display:flex;gap:12px;padding:12px 0;border-bottom:1px solid var(--border);font-size:0.9rem;color:var(--text-secondary);">
+            <span style="color:var(--accent-purple-lt);">▸</span> Index on-chain events (chest purchases, marketplace trades, staking deposits)
+          </li>
+          <li style="display:flex;gap:12px;padding:12px 0;border-bottom:1px solid var(--border);font-size:0.9rem;color:var(--text-secondary);">
+            <span style="color:var(--accent-purple-lt);">▸</span> Store item metadata: rarity, accessories, chest type, owner history
+          </li>
+          <li style="display:flex;gap:12px;padding:12px 0;border-bottom:1px solid var(--border);font-size:0.9rem;color:var(--text-secondary);">
+            <span style="color:var(--accent-purple-lt);">▸</span> Compute and cache leaderboard rankings — updated every <strong style="color:#fff;">6 hours</strong>
+          </li>
+          <li style="display:flex;gap:12px;padding:12px 0;border-bottom:1px solid var(--border);font-size:0.9rem;color:var(--text-secondary);">
+            <span style="color:var(--accent-purple-lt);">▸</span> Serve player profiles, inventory, energy/hunger bar state
+          </li>
+          <li style="display:flex;gap:12px;padding:12px 0;font-size:0.9rem;color:var(--text-secondary);">
+            <span style="color:var(--accent-purple-lt);">▸</span> Validate farm state transitions (wheat → milk → cheese logic)
+          </li>
+        </ul>
+
+        <div style="margin-top:24px;">
+          <h3 style="margin-bottom:12px; font-size:1.1rem;">Tech Stack</h3>
+          <div class="tech-stack-row">
+            <span class="tech-pill">Python 3.11</span>
+            <span class="tech-pill">FastAPI</span>
+            <span class="tech-pill">PostgreSQL</span>
+            <span class="tech-pill">Redis</span>
+            <span class="tech-pill">solana-py</span>
+            <span class="tech-pill">APScheduler</span>
+            <span class="tech-pill">Docker</span>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <h3 style="margin-bottom:16px; font-size:1.1rem;">REST API Endpoints</h3>
+        <div style="background:rgba(0,0,0,0.3);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;">
+          <table class="api-table">
+            <thead>
+              <tr>
+                <th>Method</th>
+                <th>Endpoint</th>
+                <th>Description</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><span class="method get">GET</span></td>
+                <td class="endpoint-path">/player/{wallet}</td>
+                <td>Profile, level, XP, energy/hunger bars</td>
+              </tr>
+              <tr>
+                <td><span class="method get">GET</span></td>
+                <td class="endpoint-path">/inventory/{wallet}</td>
+                <td>All owned items, accessories, cows</td>
+              </tr>
+              <tr>
+                <td><span class="method get">GET</span></td>
+                <td class="endpoint-path">/leaderboard</td>
+                <td>Daily top players + STR earned</td>
+              </tr>
+              <tr>
+                <td><span class="method post">POST</span></td>
+                <td class="endpoint-path">/farm/action</td>
+                <td>Trigger farm step (plant/harvest/feed)</td>
+              </tr>
+              <tr>
+                <td><span class="method get">GET</span></td>
+                <td class="endpoint-path">/marketplace/listings</td>
+                <td>Active marketplace listings</td>
+              </tr>
+              <tr>
+                <td><span class="method post">POST</span></td>
+                <td class="endpoint-path">/marketplace/list</td>
+                <td>List an item for sale</td>
+              </tr>
+              <tr>
+                <td><span class="method get">GET</span></td>
+                <td class="endpoint-path">/staking/{wallet}</td>
+                <td>Active stake positions + yield</td>
+              </tr>
+              <tr>
+                <td><span class="method post">POST</span></td>
+                <td class="endpoint-path">/staking/stake</td>
+                <td>Open a new stake position</td>
+              </tr>
+              <tr>
+                <td><span class="method get">GET</span></td>
+                <td class="endpoint-path">/item/{mint}</td>
+                <td>Item metadata, rarity, history</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Backend code snippet -->
+    <div class="highlight-box fade-in" style="margin-top:48px;">
+      <h3 style="margin-bottom:20px; font-size:1.1rem;">Sample: FastAPI Player Endpoint</h3>
+      <div class="code-block"><span class="kw">from</span> fastapi <span class="kw">import</span> FastAPI, HTTPException
+<span class="kw">from</span> solders.pubkey <span class="kw">import</span> Pubkey
+
+app = <span class="fn">FastAPI</span>()
+
+<span class="kw">@app.get</span>(<span class="st">"/player/{wallet_address}"</span>)
+<span class="kw">async def</span> <span class="fn">get_player</span>(wallet_address: str):
+    <span class="kw">try</span>:
+        pubkey = Pubkey.<span class="fn">from_string</span>(wallet_address)
+    <span class="kw">except</span> ValueError:
+        <span class="kw">raise</span> <span class="fn">HTTPException</span>(<span class="nm">400</span>, <span class="st">"Invalid wallet address"</span>)
+
+    player = <span class="kw">await</span> db.<span class="fn">fetch_player</span>(str(pubkey))
+    <span class="kw">if not</span> player:
+        <span class="kw">raise</span> <span class="fn">HTTPException</span>(<span class="nm">404</span>, <span class="st">"Player not registered"</span>)
+
+    <span class="kw">return</span> {
+        <span class="st">"wallet"</span>:  str(pubkey),
+        <span class="st">"level"</span>:   player.level,
+        <span class="st">"xp"</span>:      player.xp,
+        <span class="st">"energy"</span>:  player.<span class="fn">current_energy</span>(),
+        <span class="st">"hunger"</span>:  player.<span class="fn">current_hunger</span>(),
+        <span class="st">"str_bal"</span>: player.str_balance,
+    }</div>
+    </div>
+  </div>
+</section>
+
+<!-- Blockchain / Rust -->
+<section style="background: rgba(255,255,255,0.015); border-top:1px solid var(--border); border-bottom:1px solid var(--border);">
+  <div class="container">
+    <div class="fade-in">
+      <span class="section-label">Layer 3</span>
+      <h2 class="section-title">Solana Smart Contract (Rust + Anchor)</h2>
+      <p class="section-subtitle">All game logic that involves real value — registration, chest purchase, marketplace trades, staking — lives on-chain. It's important to understand the distinction between the two technologies used here:</p>
+
+      <div class="grid-2 fade-in" style="margin-top:24px; margin-bottom:0;">
+        <div style="background:rgba(20,184,166,0.06); border:1px solid rgba(20,184,166,0.2); border-radius:var(--radius); padding:20px;">
+          <h4 style="color:#2dd4bf; margin-bottom:8px;">What is Rust?</h4>
+          <p style="font-size:0.88rem; color:var(--text-secondary); margin:0;">Rust is the <strong style="color:#fff;">programming language</strong> the smart contract is written in. It's chosen because it compiles to extremely efficient bytecode that runs on Solana, and its type system prevents entire categories of bugs — like memory corruption — at compile time. Rust is what guarantees the contract can't be tampered with or exploited at the language level.</p>
+        </div>
+        <div style="background:rgba(124,58,237,0.06); border:1px solid rgba(124,58,237,0.2); border-radius:var(--radius); padding:20px;">
+          <h4 style="color:var(--accent-purple-lt); margin-bottom:8px;">What is Anchor?</h4>
+          <p style="font-size:0.88rem; color:var(--text-secondary); margin:0;">Anchor is a <strong style="color:#fff;">framework built on top of Rust</strong> that makes writing Solana programs much faster and safer. It handles the boilerplate of account validation, serialisation, and error handling through simple macros like <code style="background:rgba(255,255,255,0.08);padding:2px 6px;border-radius:4px;font-size:0.8rem;">#[account]</code> and <code style="background:rgba(255,255,255,0.08);padding:2px 6px;border-radius:4px;font-size:0.8rem;">#[program]</code>. Think of Rust as the engine and Anchor as the framework that gives it structure — the way React is built on JavaScript.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid-2 fade-in">
+      <div>
+        <h3 style="margin-bottom:16px; font-size:1.1rem;">On-chain Instructions</h3>
+        <ul style="list-style:none;">
+          <li style="padding:10px 0; border-bottom:1px solid var(--border); display:flex; gap:12px; font-size:0.9rem; color:var(--text-secondary);">
+            <span class="tag-teal tag" style="flex-shrink:0;">register_player</span>
+            Transfer 1 SOL entry fee, mint Moon NFT to player
+          </li>
+          <li style="padding:10px 0; border-bottom:1px solid var(--border); display:flex; gap:12px; font-size:0.9rem; color:var(--text-secondary);">
+            <span class="tag-teal tag" style="flex-shrink:0;">buy_chest</span>
+            Burn STR → emit chest open event, roll rarity on-chain
+          </li>
+          <li style="padding:10px 0; border-bottom:1px solid var(--border); display:flex; gap:12px; font-size:0.9rem; color:var(--text-secondary);">
+            <span class="tag-teal tag" style="flex-shrink:0;">list_item</span>
+            Escrow item NFT into marketplace PDA, set SOL price
+          </li>
+          <li style="padding:10px 0; border-bottom:1px solid var(--border); display:flex; gap:12px; font-size:0.9rem; color:var(--text-secondary);">
+            <span class="tag-teal tag" style="flex-shrink:0;">buy_item</span>
+            Transfer SOL to seller (99%) + dev wallet (1%), release NFT
+          </li>
+          <li style="padding:10px 0; border-bottom:1px solid var(--border); display:flex; gap:12px; font-size:0.9rem; color:var(--text-secondary);">
+            <span class="tag-teal tag" style="flex-shrink:0;">stake_str</span>
+            Lock STR in PDA, record unlock timestamp + yield rate
+          </li>
+          <li style="padding:10px 0; display:flex; gap:12px; font-size:0.9rem; color:var(--text-secondary);">
+            <span class="tag-teal tag" style="flex-shrink:0;">claim_rewards</span>
+            Verify unlock time, transfer STR from treasury, close PDA
+          </li>
+        </ul>
+      </div>
+
+      <div>
+        <h3 style="margin-bottom:16px; font-size:1.1rem;">Sample: Anchor Program Structure</h3>
+        <div class="code-block"><span class="cm">// Anchor smart contract (Rust)</span>
+<span class="kw">use</span> anchor_lang::prelude::*;
+
+<span class="fn">declare_id!</span>(<span class="st">"OrbiXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"</span>);
+
+<span class="kw">#[program]</span>
+<span class="kw">pub mod</span> orbi {
+  <span class="kw">use super</span>::*;
+
+  <span class="kw">pub fn</span> <span class="fn">register_player</span>(ctx: Context&lt;Register&gt;)
+    -> Result&lt;()&gt;
+  {
+    <span class="kw">let</span> fee = <span class="nm">1_000_000_000</span>u64; <span class="cm">// 1 SOL</span>
+    system_program::<span class="fn">transfer</span>(
+      CpiContext::<span class="fn">new</span>(
+        ctx.accounts.system_program.<span class="fn">to_account_info</span>(),
+        system_program::Transfer {
+          from: ctx.accounts.player.<span class="fn">to_account_info</span>(),
+          to:   ctx.accounts.treasury.<span class="fn">to_account_info</span>(),
+        },
+      ), fee,
+    )?;
+    <span class="kw">let</span> player = &<span class="kw">mut</span> ctx.accounts.player_account;
+    player.owner   = ctx.accounts.player.key();
+    player.level   = <span class="nm">1</span>;
+    player.xp      = <span class="nm">0</span>;
+    player.energy  = <span class="nm">100</span>;
+    player.hunger  = <span class="nm">100</span>;
+    <span class="fn">Ok</span>(())
+  }
+}</div>
+      </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="fade-in">
+      <h3 style="margin-bottom: 24px; font-size:1.1rem;">Development → Mainnet Pipeline</h3>
+      <div class="grid-3">
+        <div class="card">
+          <span class="card-icon">🧪</span>
+          <h3>1. Local Testing</h3>
+          <p>solana-test-validator spins up a local blockchain. Anchor tests run against it using TypeScript test harness. All instructions tested before any real funds.</p>
+        </div>
+        <div class="card">
+          <span class="card-icon">🌐</span>
+          <h3>2. Devnet Deployment</h3>
+          <p>Program deployed to Solana Devnet for integration testing. Frontend and Python backend connect to devnet RPC. Phantom set to devnet for QA.</p>
+        </div>
+        <div class="card">
+          <span class="card-icon">🚀</span>
+          <h3>3. Mainnet Launch</h3>
+          <p>Program upgraded to Mainnet Beta. LP tokens burned on Raydium. Program upgrade authority optionally transferred to a multisig for trustlessness.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Security -->
+<section>
+  <div class="container">
+    <div class="text-center fade-in">
+      <span class="section-label">Security</span>
+      <h2 class="section-title">Security-first by design</h2>
+      <p class="section-subtitle">Every architectural decision was made with the threat model in mind.</p>
+    </div>
+
+    <div class="highlight-box fade-in">
+      <div class="security-item">
+        <div class="security-num">1</div>
+        <div>
+          <h4 style="margin-bottom:6px;">Non-custodial Wallets</h4>
+          <p style="font-size:0.9rem; color:var(--text-secondary);">Orbi never stores or requests private keys. All signing happens inside Phantom on the user's device. The backend only ever sees public keys and on-chain events.</p>
+        </div>
+      </div>
+      <div class="security-item">
+        <div class="security-num">2</div>
+        <div>
+          <h4 style="margin-bottom:6px;">PDA Escrow for Marketplace</h4>
+          <p style="font-size:0.9rem; color:var(--text-secondary);">Listed items are held in a Program Derived Address (PDA) — not the developer wallet. Smart contract logic enforces that only the buyer's payment releases the NFT. No rug possible.</p>
+        </div>
+      </div>
+      <div class="security-item">
+        <div class="security-num">3</div>
+        <div>
+          <h4 style="margin-bottom:6px;">Anchor Constraint Checks</h4>
+          <p style="font-size:0.9rem; color:var(--text-secondary);">Anchor's <code style="background:rgba(255,255,255,0.08);padding:2px 6px;border-radius:4px;font-size:0.82rem;">#[account(mut, has_one = owner)]</code> constraints prevent any wallet from acting on another player's accounts. All authority checks are compile-time enforced.</p>
+        </div>
+      </div>
+      <div class="security-item">
+        <div class="security-num">4</div>
+        <div>
+          <h4 style="margin-bottom:6px;">Locked Liquidity — Raydium CLMM</h4>
+          <p style="font-size:0.9rem; color:var(--text-secondary);">$STR launches on <strong style="color:#fff;">Raydium's Concentrated Liquidity Market Maker (CLMM)</strong> — Solana's leading DEX. At launch, the initial SOL + $STR liquidity is deposited into the pool and the resulting LP (Liquidity Provider) tokens are permanently burned. Burning LP tokens means no one — including the developers — can ever withdraw the underlying liquidity. This is fully verifiable on-chain, eliminating rug-pull risk entirely. CLMM allows liquidity to be concentrated in specific price ranges, meaning tighter spreads and less slippage for traders compared to a standard AMM pool.</p>
+        </div>
+      </div>
+      <div class="security-item">
+        <div class="security-num">5</div>
+        <div>
+          <h4 style="margin-bottom:6px;">Bot Mitigation</h4>
+          <p style="font-size:0.9rem; color:var(--text-secondary);">Energy/hunger bar limits are enforced both in the backend (API rate limits) and on-chain (timestamp checks in smart contract state). Bots gain no economic advantage within the cap.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Liquidity & Token Launch -->
+<section style="background: rgba(255,255,255,0.015); border-top:1px solid var(--border); border-bottom:1px solid var(--border);">
+  <div class="container">
+    <div class="text-center fade-in">
+      <span class="section-label">Token Launch</span>
+      <h2 class="section-title">$STR Token Release, Liquidity &amp; Supply</h2>
+      <p class="section-subtitle">How $STR enters the market, how liquidity is structured, and how players are protected from day one.</p>
+    </div>
+
+    <div class="grid-2 fade-in" style="margin-top:40px;">
+
+      <!-- Phase 1: CLMM -->
+      <div class="card" style="border-color:rgba(20,184,166,0.3); background:linear-gradient(135deg,rgba(20,184,166,0.05),rgba(20,184,166,0.02));">
+        <span class="card-icon" style="font-size:1.6rem;">🚀</span>
+        <h3>Phase 1 — Initial Launch on Raydium CLMM</h3>
+        <p style="color:var(--text-secondary); font-size:0.9rem; margin-bottom:14px;">
+          The initial release of $STR will be done on <strong style="color:#fff;">Raydium</strong> using a <strong style="color:#2dd4bf;">CLMM (Concentrated Liquidity Market Maker)</strong> pool. This allows us to set our initial market cap without having to put forward large amounts of capital — liquidity is deployed within a chosen price range rather than across the entire curve, making it far more capital-efficient.
+        </p>
+        <p style="color:var(--text-secondary); font-size:0.9rem; margin-bottom:14px;">
+          At launch, <strong style="color:#fff;">LP (Liquidity Provider) tokens are burned</strong>. LP tokens represent ownership of the underlying pool assets. By burning them, no one — including the developers — can ever withdraw the initial liquidity. This is permanently verifiable on-chain.
+        </p>
+        <p style="color:var(--text-secondary); font-size:0.9rem;">
+          This gives players a verifiable guarantee that Orbi cannot be rugged at the liquidity level. The pool stays open, the tokens stay tradeable, and the devs cannot pull the floor out.
+        </p>
+        <div style="margin-top:16px;">
+          <span class="tag-teal tag">Raydium CLMM</span>
+          <span class="tag-teal tag">LP Burned at Launch</span>
+          <span class="tag-teal tag">Capital-Efficient</span>
+        </div>
+      </div>
+
+      <!-- Phase 2: DLMM -->
+      <div class="card" style="border-color:rgba(124,58,237,0.3); background:linear-gradient(135deg,rgba(124,58,237,0.05),rgba(124,58,237,0.02));">
+        <span class="card-icon" style="font-size:1.6rem;">💧</span>
+        <h3>Phase 2 — DLMM &amp; Community Liquidity (1–3 Days Post-Launch)</h3>
+        <p style="color:var(--text-secondary); font-size:0.9rem; margin-bottom:14px;">
+          Shortly after launch, a <strong style="color:#fff;">DLMM (Dynamic Liquidity Market Maker)</strong> pool will be created. Unlike a standard CLMM, a DLMM adjusts its bin structure dynamically as the price moves, reducing impermanent loss for liquidity providers.
+        </p>
+        <p style="color:var(--text-secondary); font-size:0.9rem; margin-bottom:14px;">
+          This pool is open to <strong style="color:#fff;">third parties and Orbi players</strong> — anyone can deposit their $STR into the pool and earn trading fees in return. This creates a powerful flywheel: players who hold $STR now have an additional reason to keep it rather than sell, since they can put it to work earning fees.
+        </p>
+        <p style="color:var(--text-secondary); font-size:0.9rem;">
+          The more players participate, the deeper the liquidity, the tighter the spreads, and the harder it becomes for any single actor to move the price — further stabilising $STR for the entire ecosystem.
+        </p>
+        <div style="margin-top:16px;">
+          <span class="tag">Dynamic Liquidity</span>
+          <span class="tag">Community-Owned Pool</span>
+          <span class="tag">Fee Earning</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Summary row -->
+    <div class="highlight-box fade-in" style="margin-top:40px;">
+      <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:32px; text-align:center;">
+        <div>
+          <div style="font-size:1.6rem; font-weight:800; background:var(--grad-primary);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">CLMM</div>
+          <div style="font-size:0.8rem; color:var(--text-secondary); margin-top:6px;">Launch mechanism — capital-efficient, price-range liquidity</div>
+        </div>
+        <div>
+          <div style="font-size:1.6rem; font-weight:800; background:var(--grad-teal);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">Burned LP</div>
+          <div style="font-size:0.8rem; color:var(--text-secondary); margin-top:6px;">Locked liquidity forever — verifiable on-chain, no rug possible</div>
+        </div>
+        <div>
+          <div style="font-size:1.6rem; font-weight:800; color:#fff;">1–3 Days</div>
+          <div style="font-size:0.8rem; color:var(--text-secondary); margin-top:6px;">Until DLMM opens for community liquidity providers</div>
+        </div>
+        <div>
+          <div style="font-size:1.6rem; font-weight:800; background:var(--grad-gold);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">Fees → Players</div>
+          <div style="font-size:0.8rem; color:var(--text-secondary); margin-top:6px;">Pool trading fees earned by anyone who provides liquidity</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Staking -->
+<section>
+  <div class="container">
+    <div class="text-center fade-in">
+      <span class="section-label">$STR Staking</span>
+      <h2 class="section-title">Lock, Earn, and Hold</h2>
+      <p class="section-subtitle">Staking is a core $STR sink. Players lock tokens into a Solana PDA for a fixed period and earn yield paid entirely from the staking treasury — no new minting, ever.</p>
+    </div>
+
+    <!-- How it works -->
+    <div class="highlight-box fade-in" style="margin-top:48px;">
+      <div class="grid-2" style="gap:40px;">
+        <div>
+          <h3 style="font-size:1.2rem; margin-bottom:20px;">How Staking Works On-Chain</h3>
+          <div style="display:flex; flex-direction:column; gap:16px;">
+            <div style="display:flex; gap:16px; align-items:flex-start;">
+              <div style="width:36px;height:36px;border-radius:50%;background:var(--grad-primary);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:0.85rem;flex-shrink:0;">1</div>
+              <div><strong style="color:#fff;">Player calls <code style="background:rgba(255,255,255,0.08);padding:2px 6px;border-radius:4px;font-size:0.82rem;">stake_str</code></strong><br><span style="color:var(--text-secondary);font-size:0.88rem;">The chosen amount of $STR is transferred into a Program Derived Address (PDA) owned exclusively by the smart contract. The unlock timestamp and applicable yield rate are written on-chain at this moment.</span></div>
+            </div>
+            <div style="display:flex; gap:16px; align-items:flex-start;">
+              <div style="width:36px;height:36px;border-radius:50%;background:var(--grad-teal);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:0.85rem;flex-shrink:0;">2</div>
+              <div><strong style="color:#fff;">Tokens are locked</strong><br><span style="color:var(--text-secondary);font-size:0.88rem;">The PDA is a vault with no private key — only the smart contract logic can release it. Neither the player, nor the developer, can move the tokens before the unlock time. The contract enforces this absolutely.</span></div>
+            </div>
+            <div style="display:flex; gap:16px; align-items:flex-start;">
+              <div style="width:36px;height:36px;border-radius:50%;background:var(--grad-gold);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:0.85rem;flex-shrink:0;">3</div>
+              <div><strong style="color:#fff;">Player calls <code style="background:rgba(255,255,255,0.08);padding:2px 6px;border-radius:4px;font-size:0.82rem;">claim_rewards</code></strong><br><span style="color:var(--text-secondary);font-size:0.88rem;">After the lock period expires, the player claims their original stake plus yield. The smart contract verifies the timestamp, transfers $STR from the staking treasury to the player, and closes the PDA.</span></div>
+            </div>
+          </div>
+        </div>
+        <div>
+          <h3 style="font-size:1.2rem; margin-bottom:20px;">Staking Tiers</h3>
+          <div style="display:flex; flex-direction:column; gap:12px;">
+            <div style="background:rgba(124,58,237,0.07); border:1px solid rgba(124,58,237,0.3); border-radius:var(--radius); padding:18px 20px; display:flex; align-items:center; justify-content:space-between;">
+              <div>
+                <div style="font-weight:700; color:#fff; margin-bottom:4px;">🌒 30-Day Lock</div>
+                <div style="font-size:0.82rem; color:var(--text-secondary);">Short-term commitment</div>
+              </div>
+              <div style="text-align:right;">
+                <div style="font-size:1.4rem; font-weight:900; background:var(--grad-primary);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">5% APY</div>
+                <div style="font-size:0.75rem; color:var(--text-muted);">per annum</div>
+              </div>
+            </div>
+            <div style="background:rgba(20,184,166,0.07); border:1px solid rgba(20,184,166,0.3); border-radius:var(--radius); padding:18px 20px; display:flex; align-items:center; justify-content:space-between;">
+              <div>
+                <div style="font-weight:700; color:#fff; margin-bottom:4px;">🌓 90-Day Lock</div>
+                <div style="font-size:0.82rem; color:var(--text-secondary);">Medium commitment — recommended</div>
+              </div>
+              <div style="text-align:right;">
+                <div style="font-size:1.4rem; font-weight:900; background:var(--grad-teal);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">12% APY</div>
+                <div style="font-size:0.75rem; color:var(--text-muted);">per annum</div>
+              </div>
+            </div>
+            <div style="background:rgba(251,191,36,0.07); border:1px solid rgba(251,191,36,0.3); border-radius:var(--radius); padding:18px 20px; display:flex; align-items:center; justify-content:space-between;">
+              <div>
+                <div style="font-weight:700; color:#fff; margin-bottom:4px;">🌕 180-Day Lock</div>
+                <div style="font-size:0.82rem; color:var(--text-secondary);">Long-term — maximum yield</div>
+              </div>
+              <div style="text-align:right;">
+                <div style="font-size:1.4rem; font-weight:900; background:var(--grad-gold);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">20% APY</div>
+                <div style="font-size:0.75rem; color:var(--text-muted);">per annum</div>
+              </div>
+            </div>
+          </div>
+          <div style="margin-top:16px; padding:14px; background:rgba(34,197,94,0.06); border:1px solid rgba(34,197,94,0.2); border-radius:var(--radius);">
+            <p style="font-size:0.82rem; color:var(--text-secondary); margin:0;"><strong style="color:#4ade80;">Treasury-funded only.</strong> All staking rewards are paid from the 40% staking treasury allocation. No new $STR is ever minted to pay yields — this is a hard rule enforced at the contract level.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Treasury flow -->
+    <div class="grid-3 fade-in" style="margin-top:40px;">
+      <div class="card">
+        <span class="card-icon">📦</span>
+        <h3>Chest Purchases Fund Stakes</h3>
+        <p style="color:var(--text-secondary); font-size:0.9rem;">When players buy chests with $STR, the majority (after burn) routes directly to the staking treasury. This means staking yields grow as the game gets more popular — the economic incentive aligns perfectly.</p>
+      </div>
+      <div class="card">
+        <span class="card-icon">🔒</span>
+        <h3>Supply Lock Reduces Sell Pressure</h3>
+        <p style="color:var(--text-secondary); font-size:0.9rem;">Every staked token is removed from the circulating supply for the duration of the lock. At scale, with a significant proportion staked in 90- or 180-day positions, the liquid supply contracts substantially — supporting price stability.</p>
+      </div>
+      <div class="card">
+        <span class="card-icon">⚖️</span>
+        <h3>Governance Weight for Stakers</h3>
+        <p style="color:var(--text-secondary); font-size:0.9rem;">In Phase 4 governance, staking position duration determines opposition weight. A 180-day staker carries more governance weight than a 30-day staker — rewarding long-term believers who have the most to gain from Orbi's success.</p>
+      </div>
+    </div>
+
+    <!-- Code snippet -->
+    <div class="highlight-box fade-in" style="margin-top:40px;">
+      <h3 style="margin-bottom:20px; font-size:1.1rem;">Sample: Anchor Stake Instruction</h3>
+      <div class="code-block"><span class="kw">pub fn</span> <span class="fn">stake_str</span>(ctx: Context&lt;StakeStr&gt;, amount: u64, tier: u8)
+  -> Result&lt;()&gt;
+{
+  <span class="cm">// Validate tier (0 = 30d, 1 = 90d, 2 = 180d)</span>
+  <span class="kw">let</span> lock_seconds: i64 = <span class="kw">match</span> tier {
+    <span class="nm">0</span> => <span class="nm">30</span>  * <span class="nm">86400</span>,
+    <span class="nm">1</span> => <span class="nm">90</span>  * <span class="nm">86400</span>,
+    <span class="nm">2</span> => <span class="nm">180</span> * <span class="nm">86400</span>,
+    _  => <span class="kw">return</span> <span class="fn">Err</span>(OrbiError::InvalidTier.into()),
+  };
+
+  <span class="cm">// Transfer STR from player to PDA vault</span>
+  token::<span class="fn">transfer</span>(ctx.<span class="fn">accounts</span>().<span class="fn">into_transfer_ctx</span>(), amount)?;
+
+  <span class="cm">// Write stake record on-chain</span>
+  <span class="kw">let</span> stake = &<span class="kw">mut</span> ctx.accounts.stake_account;
+  stake.owner      = ctx.accounts.player.key();
+  stake.amount     = amount;
+  stake.tier       = tier;
+  stake.unlock_at  = <span class="fn">Clock::get</span>()?.unix_timestamp + lock_seconds;
+  <span class="fn">Ok</span>(())
+}</div>
+    </div>
+  </div>
+</section>
+
+<footer class="big-footer">
+  <div class="big-footer-top">
+    <div class="container">
+      <div class="big-footer-grid">
+        <div class="big-footer-brand">
+          <div class="brand-name">☽ Orbi</div>
+          <div class="brand-tagline">To the Moon</div>
+          <p>Casual play-to-earn gaming on Solana. One Moon character. Infinite possibilities.</p>
+          <div class="footer-social-row">
+            <a href="https://twitter.com/Orbi_solana" class="footer-social-btn">𝕏 Twitter</a>
+            <a href="https://discord.gg/JGgGFaPK" class="footer-social-btn">💬 Discord</a>
+          </div>
+        </div>
+        <div class="big-footer-col">
+          <h4>Pages</h4>
+          <a href="index.html">Home</a>
+          <a href="technical.html">Technical</a>
+          <a href="strategy.html">Strategy</a>
+          <a href="brand.html">Brand</a>
+        </div>
+        <div class="big-footer-col">
+          <h4>Resources</h4>
+          <a href="https://orbiapp123.github.io/Orbi-To-the-Moon/Whitepaper/Orbi_Whitepaper.pdf" target="_blank">📄 Whitepaper</a>
+          <a href="../Game/game-hub.html">🎮 Play Demo</a>
+          <a href="strategy.html">📊 Tokenomics</a>
+          <a href="#">🔗 Solscan</a>
+        </div>
+        <div class="big-footer-col">
+          <h4>Community</h4>
+          <a href="https://twitter.com/Orbi_solana">𝕏 @Orbi_solana</a>
+          <a href="https://discord.gg/JGgGFaPK">💬 Discord</a>
+          <a href="#">📱 Telegram</a>
+          <a href="#">📺 YouTube</a>
+        </div>
+        <div class="big-footer-col">
+          <h4>Download</h4>
+          <a href="#" class="app-store-btn">
+            <span class="store-icon">🍎</span>
+            <span class="store-text">
+              <span class="store-label">Coming soon on</span>
+              <span class="store-name">App Store</span>
+            </span>
+          </a>
+          <a href="#" class="app-store-btn">
+            <span class="store-icon">▶️</span>
+            <span class="store-text">
+              <span class="store-label">Coming soon on</span>
+              <span class="store-name">Google Play</span>
+            </span>
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="big-footer-bottom">
+    <div class="container">
+      <div class="big-footer-bottom-inner">
+        <span>© 2025 Orbi Devs. Built on Solana. Not financial advice.</span>
+        <div>
+          <a href="#">Privacy</a>
+          <a href="#">Terms</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="script.js"></script>
+</body>
+</html>

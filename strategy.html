@@ -1,0 +1,893 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Orbi: To the Moon — Strategy</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    .fade-in {
+      opacity: 0;
+      transform: translateY(28px);
+      transition: opacity 0.6s ease, transform 0.6s ease;
+    }
+    .fade-in.visible { opacity: 1; transform: translateY(0); }
+
+    /* Revenue model */
+    .revenue-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 32px;
+      position: relative;
+      overflow: hidden;
+      transition: all 0.3s;
+    }
+    .revenue-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 3px;
+    }
+    .revenue-card.stream-1::before { background: var(--grad-primary); }
+    .revenue-card.stream-2::before { background: var(--grad-gold); }
+    .revenue-card.stream-3::before { background: var(--grad-teal); }
+    .revenue-card.stream-4::before { background: linear-gradient(135deg, #ec4899, #f59e0b); }
+
+    .revenue-card:hover {
+      border-color: var(--border-bright);
+      transform: translateY(-4px);
+      box-shadow: var(--shadow-glow);
+    }
+
+    .revenue-amount {
+      font-size: 2rem;
+      font-weight: 900;
+      letter-spacing: -1px;
+      margin: 8px 0;
+    }
+
+    /* Tokenomics donut (CSS only) */
+    .token-breakdown {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .token-row {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .token-bar-wrap {
+      flex: 1;
+      height: 8px;
+      background: rgba(255,255,255,0.06);
+      border-radius: 100px;
+      overflow: hidden;
+    }
+
+    .token-bar {
+      height: 100%;
+      border-radius: 100px;
+      transition: width 1s ease;
+    }
+
+    .token-pct {
+      font-size: 0.82rem;
+      font-weight: 700;
+      color: var(--text-secondary);
+      min-width: 36px;
+      text-align: right;
+    }
+
+    .token-label {
+      font-size: 0.82rem;
+      color: var(--text-secondary);
+      min-width: 140px;
+    }
+
+    /* Governance */
+    .gov-item {
+      display: flex;
+      gap: 20px;
+      padding: 24px 0;
+      border-bottom: 1px solid var(--border);
+    }
+    .gov-item:last-child { border-bottom: none; }
+    .gov-icon {
+      font-size: 1.8rem;
+      flex-shrink: 0;
+      width: 48px;
+      text-align: center;
+    }
+
+    /* Risk table */
+    .risk-row {
+      display: grid;
+      grid-template-columns: 1fr 100px 1fr;
+      gap: 20px;
+      padding: 16px 0;
+      border-bottom: 1px solid var(--border);
+      align-items: start;
+    }
+    .risk-row:first-child { padding-top: 0; }
+    .risk-row:last-child { border-bottom: none; }
+    .risk-level {
+      text-align: center;
+      font-size: 0.75rem;
+      font-weight: 700;
+      padding: 4px 10px;
+      border-radius: 100px;
+    }
+    .risk-high   { background: rgba(239,68,68,0.15);  color: #f87171; }
+    .risk-medium { background: rgba(251,191,36,0.15); color: #fbbf24; }
+    .risk-low    { background: rgba(34,197,94,0.15);  color: #4ade80; }
+
+    .phase-badge {
+      display: inline-block;
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      padding: 4px 12px;
+      border-radius: 100px;
+      margin-bottom: 12px;
+    }
+    .phase-1 { background: rgba(124,58,237,0.2);  color: var(--accent-purple-lt); border: 1px solid rgba(124,58,237,0.3); }
+    .phase-2 { background: rgba(59,130,246,0.2);  color: var(--accent-blue-lt);   border: 1px solid rgba(59,130,246,0.3); }
+    .phase-3 { background: rgba(20,184,166,0.2);  color: var(--accent-teal);       border: 1px solid rgba(20,184,166,0.3); }
+    .phase-4 { background: rgba(251,191,36,0.2);  color: var(--accent-gold);       border: 1px solid rgba(251,191,36,0.3); }
+  </style>
+</head>
+<body>
+
+<canvas id="stars-canvas"></canvas>
+
+<nav class="navbar">
+  <div class="nav-inner">
+    <span class="nav-logo">☽ Orbi</span>
+    <ul class="nav-links">
+      <li><a href="index.html">Home</a></li>
+      <li><a href="technical.html">Technical</a></li>
+      <li><a href="strategy.html">Strategy</a></li>
+      <li><a href="brand.html">Brand</a></li>
+      <li><a href="https://orbiapp123.github.io/Orbi-To-the-Moon/Whitepaper/Orbi_Whitepaper.pdf" target="_blank" class="nav-cta-ghost">📄 Whitepaper</a></li>
+      <li><a href="../Game/game-hub.html" class="nav-cta">🎮 Play Demo →</a></li>
+    </ul>
+  </div>
+</nav>
+
+<div class="page-header">
+  <div class="container">
+    <span class="page-badge">Long-Term Strategy</span>
+    <h1><span class="grad-text">Monetisation,</span> Revenue<br>&amp; Governance</h1>
+    <p>How Orbi generates sustainable revenue, manages its token economy, and scales toward community governance.</p>
+  </div>
+</div>
+
+<!-- Vision & Mission -->
+<section>
+  <div class="container">
+    <div class="grid-2 fade-in">
+      <div class="highlight-box">
+        <span class="section-label">Mission</span>
+        <h3 style="font-size:1.5rem; font-weight:800; margin:12px 0; letter-spacing:-0.5px;">
+          Make crypto gaming accessible to everyone — not just degens.
+        </h3>
+        <p style="color:var(--text-secondary); font-size:0.95rem; line-height:1.7;">
+          Orbi exists to lower the barrier to on-chain gaming without sacrificing the genuine ownership
+          and financial upside that makes crypto games compelling. One Solana. One Moon character.
+          Infinite Possibilities.
+        </p>
+      </div>
+      <div class="highlight-box" style="background:linear-gradient(135deg,rgba(59,130,246,0.08),rgba(20,184,166,0.08)); border-color:rgba(59,130,246,0.3);">
+        <span class="section-label" style="color:var(--accent-blue-lt);">Vision</span>
+        <h3 style="font-size:1.5rem; font-weight:800; margin:12px 0; letter-spacing:-0.5px;">
+          Become the #1 casual play-to-earn game on Solana within 18 months.
+        </h3>
+        <p style="color:var(--text-secondary); font-size:0.95rem; line-height:1.7;">
+          Expand from iOS to Android. Grow the minigame library to 10+ titles. Establish
+          a governance model where $STR holders can formally oppose proposed changes to
+          game structure and tokenomics — developers retain final authority through
+          weighted voting rights, ensuring accountability without losing product control.
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Revenue Streams -->
+<section style="background: rgba(255,255,255,0.015); border-top:1px solid var(--border); border-bottom:1px solid var(--border);">
+  <div class="container">
+    <div class="text-center fade-in">
+      <span class="section-label">Monetisation</span>
+      <h2 class="section-title">Three revenue streams</h2>
+      <p class="section-subtitle">Orbi generates revenue from multiple complementary sources — none of which require token inflation.</p>
+    </div>
+
+    <div class="grid-2 fade-in">
+      <div class="revenue-card stream-1">
+        <span class="card-icon">🎟️</span>
+        <div class="revenue-amount grad-text">1 SOL</div>
+        <h3>Player Registration</h3>
+        <p style="color:var(--text-secondary); font-size:0.9rem; margin-top:8px;">
+          Every new player pays a one-time entry fee to receive their Moon character NFT.
+          This is Orbi's first and most scalable revenue stream — purely driven by user growth.
+          At 1,000 players: ~$150k (at $150/SOL). Non-dilutive, non-recurring.
+        </p>
+        <div style="margin-top:12px; background:rgba(124,58,237,0.08); border:1px solid rgba(168,85,247,0.2); border-radius:8px; padding:12px 14px;">
+          <p style="font-size:0.82rem; color:var(--accent-purple-lt); margin:0;"><strong>📌 Launch note:</strong> The entry fee will be set <strong style="color:#fff;">below 1 SOL initially</strong> to encourage early adoption and build a player base quickly. Once <strong style="color:#fff;">200 players</strong> have registered, the fee increases to the full 1 SOL — rewarding early adopters and creating a natural first-mover incentive.</p>
+        </div>
+        <div style="margin-top:16px; display:flex; gap:8px; flex-wrap:wrap;">
+          <span class="tag">One-time</span>
+          <span class="tag">Scales with users</span>
+          <span class="tag">Non-inflationary</span>
+        </div>
+      </div>
+
+      <div class="revenue-card stream-2">
+        <span class="card-icon">💱</span>
+        <div class="revenue-amount grad-gold">1%</div>
+        <h3>Marketplace Fee</h3>
+        <p style="color:var(--text-secondary); font-size:0.9rem; margin-top:8px;">
+          Every peer-to-peer trade in the Orbi Marketplace generates a 1% fee paid to the developer
+          wallet. As item values appreciate and trade volume grows, this becomes a compounding
+          revenue stream entirely in SOL. Enforced on-chain — uncircumventable.
+        </p>
+        <div style="margin-top:16px; display:flex; gap:8px; flex-wrap:wrap;">
+          <span class="tag-gold tag">Ongoing</span>
+          <span class="tag-gold tag">In SOL</span>
+          <span class="tag-gold tag">On-chain enforced</span>
+        </div>
+      </div>
+
+      <div class="revenue-card stream-3">
+        <span class="card-icon">🌊</span>
+        <div class="revenue-amount" style="background:var(--grad-teal);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">DLMM Fees</div>
+        <h3>Liquidity Pool Earnings</h3>
+        <p style="color:var(--text-secondary); font-size:0.9rem; margin-top:8px;">
+          Post-launch, a Dynamic Liquidity Market Maker (DLMM) pool on Raydium opens the market
+          to third-party liquidity providers who earn trading fees — deepening the order book and
+          tightening spreads for $STR. We will also consider allocating a percentage of the
+          treasury towards providing our own liquidity to the DLMM pool, generating additional
+          fee revenue directly for the project.
+        </p>
+        <div style="margin-top:16px; display:flex; gap:8px; flex-wrap:wrap;">
+          <span class="tag-teal tag">Raydium DLMM</span>
+          <span class="tag-teal tag">Deep liquidity</span>
+          <span class="tag-teal tag">Treasury-boosted</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="text-center fade-in" style="margin-top:40px;">
+      <p style="color:var(--text-secondary); font-size:0.92rem;">Chest sales are a core part of the economic engine — they serve the staking treasury, not direct dev revenue.</p>
+    </div>
+  </div>
+</section>
+
+<!-- Airdrop -->
+<section>
+  <div class="container">
+    <div class="text-center fade-in">
+      <span class="section-label">Community Airdrop</span>
+      <h2 class="section-title">10% of $STR reserved for early believers</h2>
+      <p class="section-subtitle">A portion of the Marketing &amp; Airdrop allocation is set aside to reward the community that builds Orbi before launch.</p>
+    </div>
+    <div class="grid-3 fade-in" style="margin-top:40px;">
+      <div class="card">
+        <span class="card-icon">🐦</span>
+        <h3>Social Airdrop</h3>
+        <p style="color:var(--text-secondary); font-size:0.9rem;">Community members who follow @Orbi_solana on X, join the Discord, and complete early engagement tasks before mainnet launch are eligible for a $STR airdrop at launch.</p>
+      </div>
+      <div class="card">
+        <span class="card-icon">🧪</span>
+        <h3>Beta Tester Reward</h3>
+        <p style="color:var(--text-secondary); font-size:0.9rem;">Players who participate in Devnet testing and submit meaningful bug reports or feedback receive an airdrop bonus at mainnet launch — rewarding those who help build the product.</p>
+      </div>
+      <div class="card">
+        <span class="card-icon">🌱</span>
+        <h3>Early Adopter Bonus</h3>
+        <p style="color:var(--text-secondary); font-size:0.9rem;">The first 200 players to register at mainnet launch receive a small $STR airdrop credit on top of their standard entry. Being early has always been the best trade.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- How We Mint $STR -->
+<section style="background: rgba(255,255,255,0.015); border-top:1px solid var(--border); border-bottom:1px solid var(--border);">
+  <div class="container">
+    <div class="text-center fade-in">
+      <span class="section-label">Token Creation</span>
+      <h2 class="section-title">How $STR is minted</h2>
+      <p class="section-subtitle">Transparent, fixed, and verifiable on-chain from day one.</p>
+    </div>
+    <div class="highlight-box fade-in" style="margin-top:40px;">
+      <div class="grid-2" style="gap:40px;">
+        <div>
+          <h3 style="font-size:1.2rem; margin-bottom:20px;">The minting process</h3>
+          <div style="display:flex; flex-direction:column; gap:16px;">
+            <div style="display:flex; gap:16px; align-items:flex-start;">
+              <div style="width:36px;height:36px;border-radius:50%;background:var(--grad-primary);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:0.85rem;flex-shrink:0;">1</div>
+              <div><strong style="color:#fff;">SPL Token created on Solana</strong><br><span style="color:var(--text-secondary);font-size:0.88rem;">$STR is a standard Solana Program Library (SPL) token. The mint authority is set at deployment with a fixed total supply — no additional tokens can ever be created.</span></div>
+            </div>
+            <div style="display:flex; gap:16px; align-items:flex-start;">
+              <div style="width:36px;height:36px;border-radius:50%;background:var(--grad-gold);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:0.85rem;flex-shrink:0;">2</div>
+              <div><strong style="color:#fff;">Mint authority revoked</strong><br><span style="color:var(--text-secondary);font-size:0.88rem;">Immediately after the full supply is minted, the mint authority is permanently revoked on-chain. No wallet — including the developer wallet — can ever mint more $STR.</span></div>
+            </div>
+            <div style="display:flex; gap:16px; align-items:flex-start;">
+              <div style="width:36px;height:36px;border-radius:50%;background:var(--grad-teal);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:0.85rem;flex-shrink:0;">3</div>
+              <div><strong style="color:#fff;">Supply distributed per allocation</strong><br><span style="color:var(--text-secondary);font-size:0.88rem;">Tokens are distributed to wallets matching the allocation table: 40% to the staking treasury smart contract, 30% to the Raydium CLMM pool, 15% to the team vesting contract, 10% to the airdrop/marketing wallet, 5% to reserve.</span></div>
+            </div>
+          </div>
+        </div>
+        <div>
+          <h3 style="font-size:1.2rem; margin-bottom:20px;">Supply policy</h3>
+          <div style="display:flex; flex-direction:column; gap:12px;">
+            <div style="display:flex; justify-content:space-between; padding:10px 0; border-bottom:1px solid var(--border);">
+              <span style="color:var(--text-secondary); font-size:0.9rem;">Total Supply</span>
+              <span style="color:#fff; font-weight:700;">Fixed at mint</span>
+            </div>
+            <div style="display:flex; justify-content:space-between; padding:10px 0; border-bottom:1px solid var(--border);">
+              <span style="color:var(--text-secondary); font-size:0.9rem;">Additional minting</span>
+              <span style="color:#f87171; font-weight:700;">Impossible</span>
+            </div>
+            <div style="display:flex; justify-content:space-between; padding:10px 0; border-bottom:1px solid var(--border);">
+              <span style="color:var(--text-secondary); font-size:0.9rem;">Deflationary mechanism</span>
+              <span style="color:#4ade80; font-weight:700;">~1% burned per chest purchase</span>
+            </div>
+            <div style="display:flex; justify-content:space-between; padding:10px 0; border-bottom:1px solid var(--border);">
+              <span style="color:var(--text-secondary); font-size:0.9rem;">Staking rewards source</span>
+              <span style="color:var(--accent-purple-lt); font-weight:700;">Treasury only — no new minting</span>
+            </div>
+            <div style="display:flex; justify-content:space-between; padding:10px 0;">
+              <span style="color:var(--text-secondary); font-size:0.9rem;">Verifiable on-chain</span>
+              <span style="color:var(--accent-teal); font-weight:700;">Yes — Solscan / Explorer</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- No Rug Pull — Cypherpunk Commitments -->
+<section>
+  <div class="container">
+    <div class="text-center fade-in">
+      <span class="section-label">Trust &amp; Transparency</span>
+      <h2 class="section-title">We won't rug pull.<br>Here's the proof.</h2>
+      <p class="section-subtitle">The cypherpunk ethos is simple: don't trust, verify. Every commitment we make is enforceable on-chain — not just a promise.</p>
+    </div>
+    <div class="grid-2 fade-in" style="margin-top:48px;">
+      <div class="card" style="border-color:rgba(34,197,94,0.3);">
+        <span class="card-icon">🔥</span>
+        <h3 style="color:#4ade80;">LP Tokens Burned</h3>
+        <p style="color:var(--text-secondary); font-size:0.9rem; line-height:1.7;">At launch, the $STR/SOL liquidity pool LP tokens are burned on-chain. This permanently removes the ability for anyone — including us — to withdraw the initial liquidity. The pool is locked forever. Any wallet can verify this on Solscan the moment it happens.</p>
+      </div>
+      <div class="card" style="border-color:rgba(124,58,237,0.3);">
+        <span class="card-icon">🔐</span>
+        <h3>3-Signature Multisig Treasury</h3>
+        <p style="color:var(--text-secondary); font-size:0.9rem; line-height:1.7;">The development treasury is controlled by a 3-of-3 Squads multisig from day one. No single developer can move funds unilaterally. All three wallet addresses are published publicly — the community can monitor every treasury transaction on-chain in real time.</p>
+      </div>
+      <div class="card" style="border-color:rgba(20,184,166,0.3);">
+        <span class="card-icon">🧾</span>
+        <h3>Smart Contract Audit</h3>
+        <p style="color:var(--text-secondary); font-size:0.9rem; line-height:1.7;">All Anchor smart contracts are audited by a third-party security firm (targeting CertiK or equivalent) before mainnet launch. The full audit report is published publicly. No mainnet launch until the audit passes — this is non-negotiable.</p>
+      </div>
+      <div class="card" style="border-color:rgba(251,191,36,0.3);">
+        <span class="card-icon">📊</span>
+        <h3>Independent Economic Audit</h3>
+        <p style="color:var(--text-secondary); font-size:0.9rem; line-height:1.7;">Prior to mainnet, we commission an independent economic audit of the $STR treasury model — similar to the approach taken by Gauntlet for DeFi protocols. This verifies that staking reward rates, chest burn mechanics, and treasury projections are sustainable at scale. Results published openly.</p>
+      </div>
+      <div class="card" style="border-color:rgba(59,130,246,0.3);">
+        <span class="card-icon">🎲</span>
+        <h3>On-Chain Rarity Rolls</h3>
+        <p style="color:var(--text-secondary); font-size:0.9rem; line-height:1.7;">Item rarity from chest openings is determined on-chain — not by a server we control. Players can verify every drop is fair. We cannot manipulate drop rates after deployment without a published contract upgrade, which requires multisig approval.</p>
+      </div>
+      <div class="card" style="border-color:rgba(236,72,153,0.3);">
+        <span class="card-icon">🌙</span>
+        <h3>Non-Transferable Moon Character</h3>
+        <p style="color:var(--text-secondary); font-size:0.9rem; line-height:1.7;">The Moon character NFT is soul-bound to the player's wallet. The developer team cannot mint additional characters to their own wallets to farm rewards. One wallet, one Moon, organic progression only — enforced at the contract level.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Economic Loop: Chest → Treasury → Staking -->
+<section style="background: rgba(255,255,255,0.015); border-top:1px solid var(--border); border-bottom:1px solid var(--border);">
+  <div class="container">
+    <div class="text-center fade-in">
+      <span class="section-label">The Economic Loop</span>
+      <h2 class="section-title">Chests drive everything</h2>
+      <p class="section-subtitle">Every chest purchased sets off a chain reaction that funds stakers, burns supply, and brings players back.</p>
+    </div>
+
+    <!-- Circular / cyclic flow diagram -->
+    <div class="fade-in" style="margin-top:56px; max-width:680px; margin-left:auto; margin-right:auto;">
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:24px; position:relative;">
+        <!-- Node TL -->
+        <div style="background:rgba(124,58,237,0.08); border:1px solid rgba(124,58,237,0.4); border-radius:var(--radius-lg); padding:24px; text-align:center;">
+          <div style="font-size:2rem; margin-bottom:8px;">📦</div>
+          <strong style="color:#fff; display:block; margin-bottom:4px;">Player Buys Chest</strong>
+          <p style="font-size:0.8rem; color:var(--text-secondary); margin:0;">Spends $STR to roll for rare items</p>
+        </div>
+        <!-- Arrow right (TR) -->
+        <div style="background:rgba(239,68,68,0.06); border:1px solid rgba(239,68,68,0.3); border-radius:var(--radius-lg); padding:24px; text-align:center;">
+          <div style="font-size:2rem; margin-bottom:8px;">🔥</div>
+          <strong style="color:#fff; display:block; margin-bottom:4px;">~1% Burned</strong>
+          <p style="font-size:0.8rem; color:var(--text-secondary); margin:0;">Permanently removed from supply</p>
+        </div>
+        <!-- Arrows column -->
+        <div style="display:flex; align-items:center; justify-content:center; font-size:1.6rem; color:var(--text-muted); transform:rotate(180deg);">↑</div>
+        <div style="display:flex; align-items:center; justify-content:center; font-size:1.6rem; color:var(--text-muted);">↓</div>
+        <!-- Node BL -->
+        <div style="background:rgba(34,197,94,0.06); border:1px solid rgba(34,197,94,0.35); border-radius:var(--radius-lg); padding:24px; text-align:center;">
+          <div style="font-size:2rem; margin-bottom:8px;">🏆</div>
+          <strong style="color:#fff; display:block; margin-bottom:4px;">Stakers Earn Yield</strong>
+          <p style="font-size:0.8rem; color:var(--text-secondary); margin:0;">Paid from treasury, not new minting</p>
+        </div>
+        <!-- Node BR -->
+        <div style="background:rgba(59,130,246,0.06); border:1px solid rgba(59,130,246,0.4); border-radius:var(--radius-lg); padding:24px; text-align:center;">
+          <div style="font-size:2rem; margin-bottom:8px;">🏦</div>
+          <strong style="color:#fff; display:block; margin-bottom:4px;">Staking Treasury Fills</strong>
+          <p style="font-size:0.8rem; color:var(--text-secondary); margin:0;">Remainder pools into staking rewards</p>
+        </div>
+      </div>
+      <div style="text-align:center; margin-top:24px; padding:16px; background:rgba(251,191,36,0.06); border:1px solid rgba(251,191,36,0.25); border-radius:var(--radius-lg);">
+        <p style="color:var(--accent-gold); font-size:0.9rem; margin:0;"><strong>The self-reinforcing loop:</strong> better staking yields attract more players → more players buy more chests → treasury grows → yields improve further.</p>
+      </div>
+    </div>
+
+    <!-- Chest types -->
+    <div class="text-center fade-in" style="margin-top:56px;">
+      <span class="section-label">Chest System</span>
+      <h3 class="section-title" style="font-size:1.8rem;">Six chest types. One economy.</h3>
+      <p style="color:var(--text-secondary); font-size:0.9rem; max-width:560px; margin:0 auto 40px;">Each chest targets a different player need — items, farming, seeds — with rarity tiers creating genuine scarcity and market value.</p>
+    </div>
+    <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(150px, 1fr)); gap:16px;" class="fade-in">
+      <div style="background:var(--bg-card);border:1px solid rgba(156,163,175,0.4);border-radius:var(--radius-lg);padding:20px 14px;text-align:center;">
+        <span style="font-size:2rem;display:block;margin-bottom:8px;">📦</span>
+        <h4 style="font-size:0.88rem;font-weight:700;color:#9ca3af;margin-bottom:6px;">Common</h4>
+        <p style="font-size:0.75rem;color:var(--text-muted);margin:0;">Basic accessories and consumables.</p>
+      </div>
+      <div style="background:var(--bg-card);border:1px solid rgba(34,197,94,0.4);border-radius:var(--radius-lg);padding:20px 14px;text-align:center;">
+        <span style="font-size:2rem;display:block;margin-bottom:8px;">🟩</span>
+        <h4 style="font-size:0.88rem;font-weight:700;color:#4ade80;margin-bottom:6px;">Uncommon</h4>
+        <p style="font-size:0.75rem;color:var(--text-muted);margin:0;">Better accessories, early-tier cows.</p>
+      </div>
+      <div style="background:var(--bg-card);border:1px solid rgba(59,130,246,0.4);border-radius:var(--radius-lg);padding:20px 14px;text-align:center;">
+        <span style="font-size:2rem;display:block;margin-bottom:8px;">🟦</span>
+        <h4 style="font-size:0.88rem;font-weight:700;color:#60a5fa;margin-bottom:6px;">Rare</h4>
+        <p style="font-size:0.75rem;color:var(--text-muted);margin:0;">High-quality items, mid-tier cows.</p>
+      </div>
+      <div style="background:var(--bg-card);border:1px solid rgba(124,58,237,0.4);border-radius:var(--radius-lg);padding:20px 14px;text-align:center;">
+        <span style="font-size:2rem;display:block;margin-bottom:8px;">🟪</span>
+        <h4 style="font-size:0.88rem;font-weight:700;color:var(--accent-purple-lt);margin-bottom:6px;">Epic</h4>
+        <p style="font-size:0.75rem;color:var(--text-muted);margin:0;">Powerful accessories. XP-gated.</p>
+      </div>
+      <div style="background:linear-gradient(135deg,rgba(251,191,36,0.06),rgba(124,58,237,0.06));border:1px solid rgba(251,191,36,0.5);border-radius:var(--radius-lg);padding:20px 14px;text-align:center;">
+        <span style="font-size:2rem;display:block;margin-bottom:8px;">🌟</span>
+        <h4 style="font-size:0.88rem;font-weight:700;color:var(--accent-gold);margin-bottom:6px;">Cosmic</h4>
+        <p style="font-size:0.75rem;color:var(--text-muted);margin:0;">Rarest in the game. Top marketplace prices.</p>
+      </div>
+      <div style="background:var(--bg-card);border:1px solid rgba(20,184,166,0.4);border-radius:var(--radius-lg);padding:20px 14px;text-align:center;">
+        <span style="font-size:2rem;display:block;margin-bottom:8px;">🌱</span>
+        <h4 style="font-size:0.88rem;font-weight:700;color:#2dd4bf;margin-bottom:6px;">Seed Chest</h4>
+        <p style="font-size:0.75rem;color:var(--text-muted);margin:0;">Unlocks extra farm plots. Required for farming expansion.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Tokenomics -->
+<section>
+  <div class="container">
+    <div class="text-center fade-in">
+      <span class="section-label">Tokenomics</span>
+      <h2 class="section-title">$STR — Designed to hold value</h2>
+      <p class="section-subtitle">
+        Every design decision is aimed at preventing the failures of Axie Infinity. Supply is fixed,
+        sinks are built-in, and rewards are funded by real game revenue — not inflation.
+      </p>
+    </div>
+
+    <div class="grid-2 fade-in">
+      <div class="card">
+        <h3 style="margin-bottom:24px;">Token Allocation</h3>
+        <div class="token-breakdown">
+          <div class="token-row">
+            <span class="token-label">Staking Treasury</span>
+            <div class="token-bar-wrap">
+              <div class="token-bar" style="width:40%; background:var(--grad-primary);"></div>
+            </div>
+            <span class="token-pct">40%</span>
+          </div>
+          <div class="token-row">
+            <span class="token-label">Public Launch (CLMM)</span>
+            <div class="token-bar-wrap">
+              <div class="token-bar" style="width:30%; background:var(--grad-gold);"></div>
+            </div>
+            <span class="token-pct">30%</span>
+          </div>
+          <div class="token-row">
+            <span class="token-label">Team & Development</span>
+            <div class="token-bar-wrap">
+              <div class="token-bar" style="width:15%; background:var(--grad-teal);"></div>
+            </div>
+            <span class="token-pct">15%</span>
+          </div>
+          <div class="token-row">
+            <span class="token-label">Marketing & Airdrop</span>
+            <div class="token-bar-wrap">
+              <div class="token-bar" style="width:10%; background:linear-gradient(135deg,#ec4899,#f59e0b);"></div>
+            </div>
+            <span class="token-pct">10%</span>
+          </div>
+          <div class="token-row">
+            <span class="token-label">Reserve</span>
+            <div class="token-bar-wrap">
+              <div class="token-bar" style="width:5%; background:rgba(255,255,255,0.3);"></div>
+            </div>
+            <span class="token-pct">5%</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3 style="margin-bottom:20px;">Token Flow & Sinks</h3>
+        <div style="display:flex; flex-direction:column; gap:16px;">
+          <div style="display:flex; gap:12px; align-items:flex-start;">
+            <span style="color:var(--accent-purple-lt); font-size:1.2rem;">▸</span>
+            <div>
+              <strong>Chest purchases</strong> — primary STR sink. Burns a portion, routes rest to staking treasury.
+            </div>
+          </div>
+          <div style="display:flex; gap:12px; align-items:flex-start;">
+            <span style="color:var(--accent-blue-lt); font-size:1.2rem;">▸</span>
+            <div>
+              <strong>Staking locks</strong> — tokens removed from circulation for fixed periods (30/90/180 days), reducing sell pressure.
+            </div>
+          </div>
+          <div style="display:flex; gap:12px; align-items:flex-start;">
+            <span style="color:var(--accent-gold); font-size:1.2rem;">▸</span>
+            <div>
+              <strong>Leaderboard rewards</strong> — distributed daily from a fixed per-day STR budget, not minted fresh.
+            </div>
+          </div>
+          <div style="display:flex; gap:12px; align-items:flex-start;">
+            <span style="color:var(--accent-teal); font-size:1.2rem;">▸</span>
+            <div>
+              <strong>Dev supply control</strong> — team can adjust mini-game rewards per epoch to stabilise STR price without touching supply.
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Token Launch -->
+    <div class="highlight-box fade-in" style="margin-top:40px;">
+      <div class="grid-2" style="gap:40px; align-items:center;">
+        <div>
+          <span class="section-label">Token Launch</span>
+          <h3 style="font-size:1.4rem; font-weight:800; letter-spacing:-0.5px; margin:12px 0;">Raydium CLMM → DLMM</h3>
+          <p style="color:var(--text-secondary); font-size:0.92rem; line-height:1.7; margin-bottom:16px;">
+            The initial token release uses a Concentrated Liquidity Market Maker (CLMM) pool on Raydium.
+            This lets the team set the initial market cap and price range without deploying large capital.
+          </p>
+          <p style="color:var(--text-secondary); font-size:0.92rem; line-height:1.7;">
+            LP tokens are <strong style="color:#fff;">burned immediately</strong> — provably locked liquidity.
+            1–3 days post-launch, a DLMM pool opens so third parties can provide liquidity and earn fees,
+            creating a decentralised, self-sustaining market.
+          </p>
+        </div>
+        <div>
+          <div style="display:flex; flex-direction:column; gap:16px;">
+            <div style="display:flex; align-items:center; gap:16px;">
+              <div style="width:40px;height:40px;border-radius:50%;background:var(--grad-primary);display:flex;align-items:center;justify-content:center;font-weight:700;flex-shrink:0;">1</div>
+              <div>
+                <strong>CLMM Launch</strong>
+                <div style="font-size:0.85rem;color:var(--text-secondary);">Set initial price range. Deploy initial STR/SOL liquidity.</div>
+              </div>
+            </div>
+            <div style="display:flex; align-items:center; gap:16px;">
+              <div style="width:40px;height:40px;border-radius:50%;background:var(--grad-gold);display:flex;align-items:center;justify-content:center;font-weight:700;flex-shrink:0;">2</div>
+              <div>
+                <strong>LP Token Burn</strong>
+                <div style="font-size:0.85rem;color:var(--text-secondary);">Burn LP tokens on-chain. Players can verify. No rug possible.</div>
+              </div>
+            </div>
+            <div style="display:flex; align-items:center; gap:16px;">
+              <div style="width:40px;height:40px;border-radius:50%;background:var(--grad-teal);display:flex;align-items:center;justify-content:center;font-weight:700;flex-shrink:0;">3</div>
+              <div>
+                <strong>DLMM Open</strong>
+                <div style="font-size:0.85rem;color:var(--text-secondary);">Community can add liquidity, earn fees. Deep, decentralised market.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Roadmap -->
+<section id="roadmap-section" style="background: rgba(255,255,255,0.015); border-top:1px solid var(--border); border-bottom:1px solid var(--border);">
+  <div class="container">
+    <div class="text-center fade-in">
+      <span class="section-label">Roadmap</span>
+      <h2 class="section-title">Five phases to Full Moon</h2>
+      <p class="section-subtitle">Each phase named after a lunar stage — because we're going to the moon, and we know exactly how we get there.</p>
+    </div>
+
+    <div class="fade-in" style="margin-top:56px; display:flex; gap:48px; align-items:flex-start;">
+
+      <!-- Left: Moon track + phases -->
+      <div style="flex:1;">
+        <div class="roadmap-moon-wrap" id="roadmap-wrap">
+          <!-- Sliding moon column -->
+          <div class="roadmap-track-col">
+            <div class="roadmap-track-line"></div>
+            <div class="roadmap-moon-el" id="roadmap-moon">🌑</div>
+          </div>
+
+          <!-- Phase items -->
+          <div class="roadmap-items-col">
+            <div class="roadmap-phase" data-phase="0">
+              <div class="roadmap-phase-badge" style="background:rgba(124,58,237,0.15);color:var(--accent-purple-lt);border:1px solid rgba(124,58,237,0.3);">🌑 New Moon — Q2 2026</div>
+              <h4>Phase 1: Development</h4>
+              <p>Finalising the DApp itself. Core game loop complete. Solana smart contracts on testnet. Python backend live. iOS WebView shell built. Phantom wallet integrated. Building hype through socials while we develop.</p>
+            </div>
+            <div class="roadmap-phase" data-phase="1">
+              <div class="roadmap-phase-badge" style="background:rgba(59,130,246,0.15);color:var(--accent-blue-lt);border:1px solid rgba(59,130,246,0.3);">🌒 Waxing Crescent — Q3 2026</div>
+              <h4>Phase 2: Devnet Launch</h4>
+              <p>Release to Solana Devnet. Public beta with Solana Earn bounty competitions — leaderboard rewards for early testers. Crypto influencer content begins pre-launch. X and Discord communities growing. Bug bounty live.</p>
+            </div>
+            <div class="roadmap-phase" data-phase="2">
+              <div class="roadmap-phase-badge" style="background:rgba(20,184,166,0.15);color:var(--accent-teal);border:1px solid rgba(20,184,166,0.3);">🌓 First Quarter — Q4 2026</div>
+              <h4>Phase 3: Mainnet Launch</h4>
+              <p>Game live on Solana mainnet. $STR token launches on Raydium CLMM with LP burned on-chain. Public countdown and Discord watch party. DLMM pool opens on Meteora. Token airdrop for early community. App Store submission. Daily on-chain transparency updates: treasury size, staking pool, leaderboard payouts.</p>
+            </div>
+            <div class="roadmap-phase" data-phase="3">
+              <div class="roadmap-phase-badge" style="background:rgba(251,191,36,0.15);color:var(--accent-gold);border:1px solid rgba(251,191,36,0.3);">🌔 Waxing Gibbous — Q1 2027</div>
+              <h4>Phase 4: Community &amp; Marketing</h4>
+              <p>Community feedback channels on Discord. Partnership with streamers and crypto influencers. New minigames rolled out via community vote. Limited-time events — PvP battles, speed farming weekends, boosted leaderboard rewards. Clan system introduced.</p>
+            </div>
+            <div class="roadmap-phase" data-phase="4">
+              <div class="roadmap-phase-badge" style="background:rgba(251,191,36,0.2);color:#fbbf24;border:1px solid rgba(251,191,36,0.5);">🌕 Full Moon — 2027+</div>
+              <h4>Phase 5: Growth &amp; Maturity</h4>
+              <p>Tight-knit community maintained. Referral system live — current players rewarded for bringing new users (referred players must reach a specific level first, preventing bot exploitation). 10+ minigames. Android launch. KPI targets as baseline for the next chapter.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right: KPIs -->
+      <div style="width:300px; flex-shrink:0;">
+        <div class="card" style="position:sticky; top:120px;">
+          <h3 style="margin-bottom:20px;">📊 KPIs</h3>
+          <div style="display:flex;flex-direction:column;gap:14px;">
+            <div>
+              <div style="font-size:0.75rem;color:var(--text-muted);font-weight:600;letter-spacing:1px;text-transform:uppercase;margin-bottom:4px;">Registered Players</div>
+              <div class="grad-text" style="font-size:1.5rem;font-weight:900;letter-spacing:-0.5px;">1,000+</div>
+            </div>
+            <div style="border-top:1px solid var(--border);padding-top:14px;">
+              <div style="font-size:0.75rem;color:var(--text-muted);font-weight:600;letter-spacing:1px;text-transform:uppercase;margin-bottom:4px;">Daily Active Users</div>
+              <div class="grad-text" style="font-size:1.5rem;font-weight:900;letter-spacing:-0.5px;">300+</div>
+            </div>
+            <div style="border-top:1px solid var(--border);padding-top:14px;">
+              <div style="font-size:0.75rem;color:var(--text-muted);font-weight:600;letter-spacing:1px;text-transform:uppercase;margin-bottom:4px;">$STR Market Cap</div>
+              <div class="grad-gold" style="font-size:1.5rem;font-weight:900;letter-spacing:-0.5px;">$5M–$10M</div>
+            </div>
+            <div style="border-top:1px solid var(--border);padding-top:14px;">
+              <div style="font-size:0.75rem;color:var(--text-muted);font-weight:600;letter-spacing:1px;text-transform:uppercase;margin-bottom:4px;">Marketplace Volume</div>
+              <div class="grad-gold" style="font-size:1.5rem;font-weight:900;letter-spacing:-0.5px;">10,000+ SOL</div>
+            </div>
+            <div style="border-top:1px solid var(--border);padding-top:14px;">
+              <div style="font-size:0.75rem;color:var(--text-muted);font-weight:600;letter-spacing:1px;text-transform:uppercase;margin-bottom:4px;">Discord Members</div>
+              <div style="font-size:1.5rem;font-weight:900;letter-spacing:-0.5px;background:var(--grad-teal);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">3,000+</div>
+            </div>
+          </div>
+          <div style="margin-top:20px;padding:14px;background:rgba(251,191,36,0.06);border:1px solid rgba(251,191,36,0.2);border-radius:var(--radius);">
+            <p style="font-size:0.8rem;color:var(--text-secondary);margin:0;">These are our base targets. The full moon is just the beginning — Stage 5 launches the next chapter.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Moon phase JS animation -->
+    <script>
+    (function() {
+      const moonPhases = ['🌑','🌒','🌓','🌔','🌕'];
+      const moonEl = document.getElementById('roadmap-moon');
+      const phases = document.querySelectorAll('.roadmap-phase');
+      if (!moonEl || !phases.length) return;
+
+      function updateMoon() {
+        let currentPhase = 0;
+        phases.forEach((phase, i) => {
+          const rect = phase.getBoundingClientRect();
+          if (rect.top < window.innerHeight * 0.6) currentPhase = i;
+        });
+        moonEl.textContent = moonPhases[currentPhase];
+      }
+
+      window.addEventListener('scroll', updateMoon, { passive: true });
+      updateMoon();
+    })();
+    </script>
+  </div>
+</section>
+
+
+<!-- Governance -->
+<section>
+  <div class="container">
+    <div class="text-center fade-in">
+      <span class="section-label">Governance</span>
+      <h2 class="section-title">Progressively Decentralised Control</h2>
+      <p class="section-subtitle">We launch with a developer-led structure for speed and quality, then give $STR holders a formal voice as the ecosystem matures — without surrendering product control.</p>
+    </div>
+
+    <div class="highlight-box fade-in">
+      <div class="gov-item">
+        <span class="gov-icon">🏛️</span>
+        <div>
+          <h4 style="margin-bottom:6px;">Phase 1–3: Developer-Led</h4>
+          <p style="font-size:0.9rem; color:var(--text-secondary);">
+            Development, tokenomics parameters, and treasury allocation are controlled by the developers.
+            This allows fast iteration, security response, and coherent product vision during the critical early phase.
+            All decisions are announced publicly on X and Discord before execution.
+          </p>
+        </div>
+      </div>
+      <div class="gov-item">
+        <span class="gov-icon">🗳️</span>
+        <div>
+          <h4 style="margin-bottom:6px;">Phase 4: Token Holder Governance</h4>
+          <p style="font-size:0.9rem; color:var(--text-secondary);">
+            Once the ecosystem is stable, $STR holders gain the ability to formally oppose proposed
+            changes to game structure, staking rates, treasury allocation, and tokenomics parameters.
+            Developers retain final authority through weighted voting rights — ensuring the community
+            has a real voice without the product losing direction. Long-term stakers receive stronger
+            opposition weight than short-term holders.
+          </p>
+        </div>
+      </div>
+      <div class="gov-item" style="border-bottom:none;">
+        <span class="gov-icon">🔐</span>
+        <div>
+          <h4 style="margin-bottom:6px;">3-Signature Multisig Treasury</h4>
+          <p style="font-size:0.9rem; color:var(--text-secondary);">
+            From day one, the development treasury is controlled by a 3-signature Squads multisig —
+            all three signatures are required to move any funds. No single developer can act unilaterally.
+            Wallet addresses are published publicly so the community can monitor all treasury activity on-chain.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Risk & Mitigation -->
+<section style="background: rgba(255,255,255,0.015); border-top:1px solid var(--border); border-bottom:1px solid var(--border);">
+  <div class="container">
+    <div class="text-center fade-in">
+      <span class="section-label">Risk Management</span>
+      <h2 class="section-title">We know the risks. Here's how we mitigate them.</h2>
+    </div>
+
+    <div class="card fade-in">
+      <div class="risk-row" style="padding-top:0;">
+        <strong>Risk</strong>
+        <strong style="text-align:center;">Level</strong>
+        <strong>Mitigation</strong>
+      </div>
+      <div class="risk-row">
+        <span style="color:var(--text-secondary); font-size:0.9rem;">Token price collapse (Axie Infinity scenario)</span>
+        <span class="risk-level risk-high">High</span>
+        <span style="color:var(--text-secondary); font-size:0.9rem;">Fixed supply, staking sinks, no uncapped minting, chest-funded rewards</span>
+      </div>
+      <div class="risk-row">
+        <span style="color:var(--text-secondary); font-size:0.9rem;">Bot farm exploitation</span>
+        <span class="risk-level risk-medium">Medium</span>
+        <span style="color:var(--text-secondary); font-size:0.9rem;">Energy/hunger caps enforced on-chain + API; non-transferable Moon NFT prevents multi-accounting</span>
+      </div>
+      <div class="risk-row">
+        <span style="color:var(--text-secondary); font-size:0.9rem;">Smart contract exploit</span>
+        <span class="risk-level risk-high">High</span>
+        <span style="color:var(--text-secondary); font-size:0.9rem;">Third-party Anchor audit before mainnet; devnet testing period; bug bounty programme</span>
+      </div>
+      <div class="risk-row">
+        <span style="color:var(--text-secondary); font-size:0.9rem;">Regulatory uncertainty (crypto games)</span>
+        <span class="risk-level risk-medium">Medium</span>
+        <span style="color:var(--text-secondary); font-size:0.9rem;">$STR is a utility token for gameplay, not marketed as investment. Legal counsel engaged pre-launch.</span>
+      </div>
+      <div class="risk-row">
+        <span style="color:var(--text-secondary); font-size:0.9rem;">Low player retention</span>
+        <span class="risk-level risk-low">Low</span>
+        <span style="color:var(--text-secondary); font-size:0.9rem;">Proven casual game loop (farming, minigames, progression) with financial upside as added incentive</span>
+      </div>
+      <div class="risk-row">
+        <span style="color:var(--text-secondary); font-size:0.9rem;">Solana network outages</span>
+        <span class="risk-level risk-low">Low</span>
+        <span style="color:var(--text-secondary); font-size:0.9rem;">Game continues in read-only mode during outages; farm timers pause gracefully; no funds at risk</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer class="big-footer">
+  <div class="big-footer-top">
+    <div class="container">
+      <div class="big-footer-grid">
+        <div class="big-footer-brand">
+          <div class="brand-name">☽ Orbi</div>
+          <div class="brand-tagline">To the Moon</div>
+          <p>Casual play-to-earn gaming on Solana. One Moon character. Infinite possibilities.</p>
+          <div class="footer-social-row">
+            <a href="https://twitter.com/Orbi_solana" class="footer-social-btn">𝕏 Twitter</a>
+            <a href="https://discord.gg/JGgGFaPK" class="footer-social-btn">💬 Discord</a>
+          </div>
+        </div>
+        <div class="big-footer-col">
+          <h4>Pages</h4>
+          <a href="index.html">Home</a>
+          <a href="technical.html">Technical</a>
+          <a href="strategy.html">Strategy</a>
+          <a href="brand.html">Brand</a>
+        </div>
+        <div class="big-footer-col">
+          <h4>Resources</h4>
+          <a href="https://orbiapp123.github.io/Orbi-To-the-Moon/Whitepaper/Orbi_Whitepaper.pdf" target="_blank">📄 Whitepaper</a>
+          <a href="../Game/game-hub.html">🎮 Play Demo</a>
+          <a href="strategy.html">📊 Tokenomics</a>
+          <a href="#">🔗 Solscan</a>
+        </div>
+        <div class="big-footer-col">
+          <h4>Community</h4>
+          <a href="https://twitter.com/Orbi_solana">𝕏 @Orbi_solana</a>
+          <a href="https://discord.gg/JGgGFaPK">💬 Discord</a>
+          <a href="#">📱 Telegram</a>
+          <a href="#">📺 YouTube</a>
+        </div>
+        <div class="big-footer-col">
+          <h4>Download</h4>
+          <a href="#" class="app-store-btn">
+            <span class="store-icon">🍎</span>
+            <span class="store-text">
+              <span class="store-label">Coming soon on</span>
+              <span class="store-name">App Store</span>
+            </span>
+          </a>
+          <a href="#" class="app-store-btn">
+            <span class="store-icon">▶️</span>
+            <span class="store-text">
+              <span class="store-label">Coming soon on</span>
+              <span class="store-name">Google Play</span>
+            </span>
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="big-footer-bottom">
+    <div class="container">
+      <div class="big-footer-bottom-inner">
+        <span>© 2025 Orbi Devs. Built on Solana. Not financial advice.</span>
+        <div>
+          <a href="#">Privacy</a>
+          <a href="#">Terms</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="script.js"></script>
+</body>
+</html>
